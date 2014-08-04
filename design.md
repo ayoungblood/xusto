@@ -12,7 +12,6 @@ Interpreter vars
 	uint8_t flags; // state flags
 	uint8_t pgm[256][256]; // program space
 	uint8_t* stack; // stack pointer, dynamic array
-	uint8_t heap[256]; // heap vector
 
 Flags
 	
@@ -107,4 +106,22 @@ if no program header is found, iptr = [0,0] and ivec = [1,0]
 dimensions are implicit from maximum line lengths if not specified  
 popping an empty stack is an exception  
 \ is a special character, indicating the program header  
+
+**Header format**
+
+	\f:0/wx:0/wy:0/bx:0/by:0/vx:0/vy:0/px:0/py:0/sx:0/sy:0/
+	
+A file is composed of token:value pairs (separated by colors). Each pair is separated by a forward slash. Tokens are as follows:
+
+	f:  flags
+	wx: warp x
+	wy: warp y
+	bx: beacon x
+	by: beacon y
+	vx: ivec x
+	vy: ivec y
+	px: iptr x
+	py: iptr y
+	sx: pgmsize x
+	sy: pgmsize y
 
