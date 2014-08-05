@@ -3,6 +3,9 @@
  *
  */
 
+#ifndef I18N_PRESENT
+#define I18N_PRESENT
+
 // Message types
 #define MSG_TYP_CATASTROPHIC "RUN AWAY"
 #define MSG_TYP_ERROR        "ERROR"
@@ -22,3 +25,5 @@
 
 // MISC STRINGS
 #define MISCSTR_BADERROR "Error message encountered an error. Seek help\n"
+
+#endif

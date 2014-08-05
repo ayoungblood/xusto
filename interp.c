@@ -26,7 +26,8 @@ int main(int argc, char **argv) {
             s.pgm[i][j] = ' ';
     s.pgmsize[0] = s.pgmsize[1] = 0;
     s.stack = malloc(sizeof(s.stack)*64);
-    s.stacksize = 64;
+    s.stackbase = s.stack;
+    s.stackmax = 64;
     
     // validate args, if they exist
     if (argc == 1) {

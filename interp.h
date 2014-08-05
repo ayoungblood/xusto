@@ -45,7 +45,8 @@ typedef struct {
     uint8_t  pgm[256][256]; // program space
     uint16_t pgmsize[2]; // program space dimensions
     uint8_t* stack; // stack pointer, dynamic array
-    uint64_t stacksize; // allocated stack height
+    uint8_t* stackbase; // bottom of stack
+    uint64_t stackmax; // allocated length of stack
 } State;
 
 // Functions
