@@ -14,10 +14,11 @@
 #define MSG_ERR_NOSOURCE   "Feed me source file", 0x100
 #define MSG_ERR_BADSOURCE  "Icky source file", 0x101
 #define MSG_ERR_BADHEADER  "Icky header file", 0x102
+#define MSG_ERR_SOURCEDIMS "Source dimensions too large", 0x103
 // WARNING MESSAGES
 #define MSG_WRN_BADOPTION  "Option may not exist:", 0x200
 // INFO MESSAGES
 // DEBUG MESSAGES
 
 // MISC STRINGS
-#define MSTR_BADERROR "Error meesage encountered an error. Seek help\n"
+#define MISCSTR_BADERROR "Error message encountered an error. Seek help\n"

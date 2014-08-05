@@ -9,19 +9,6 @@
 
 #include "interp.h"
 
-// Interpreter state struct
-typedef struct {
-    uint8_t  iptr[2]; // instruction pointer
-    uint8_t  ivec[2]; // instruction vector
-    uint8_t  bcon[2]; // beacon position
-    uint8_t  warp[2]; // program space warp
-    uint8_t  flags; // state flag bitfield
-    uint8_t  pgm[256][256]; // program space
-    uint16_t pgmsize[2]; // program space dimensions
-    uint8_t* stack; // stack pointer, dynamic array
-    uint64_t stacksize; // allocated stack height
-} State;
-
 State s;
 
 int main(int argc, char **argv) {
@@ -65,18 +52,27 @@ int main(int argc, char **argv) {
         return 0;
     }
     s.pgmsize[0] = s.pgmsize[1] = 0;
-    
+    // load source into program space
     char c;
     i = j = 0;
     while ((c = fgetc(fsource)) != EOF) {
         if (c == '\\') {
             char header[256];
             fgets(header, sizeof(header), fsource);
+            // FIXME process header properly
             printf("Ignoring header: %s\n",header);
         } else if (c != '\n') {
+            if (i==255) {
+                message(MSG_ERR_SOURCEDIMS,0);
+                return MAIN_RV_ERR;
+            }
             s.pgm[i][j] = c;
             ++i;
         } else {
+            if (j==255) {
+                message(MSG_ERR_SOURCEDIMS,0);
+                return MAIN_RV_ERR;
+            }
             s.pgmsize[0] = s.pgmsize[0]<i?i:s.pgmsize[0];
             ++j;
             i = 0;
@@ -84,6 +80,7 @@ int main(int argc, char **argv) {
     }
     s.pgmsize[1] = j;
     fclose(fsource);
+    
     // print program space
     printf("########\n");
     for (j=0; j<s.pgmsize[1]; ++j) {
@@ -94,4 +91,40 @@ int main(int argc, char **argv) {
     }
     printf("########\nProgram size: %i,%i\n",s.pgmsize[0],s.pgmsize[1]);
     return 0;
+}
+/********
+ * Execute an instruction
+ */
+void execute(char* c, State* s) {
+    //
+}
+/********
+ * Print messages to the user
+ */
+void message(const char* msg, int code, char* extra) {
+    char* type;
+    switch (code >> 8) {
+        case 0: // SHOULD NOT HAPPEN
+            type = ANSI_C_RED MSG_TYP_CATASTROPHIC;
+            break;
+        case 1: // ERROR
+            type = ANSI_C_RED MSG_TYP_ERROR;
+            break;
+        case 2: // WARNING
+            type = ANSI_C_YELLOW MSG_TYP_WARNING;
+            break;
+        case 3: // INFO
+            type = ANSI_C_GREEN MSG_TYP_INFO;
+            break;
+        case 4: // DEBUG
+            type = ANSI_C_GREEN MSG_TYP_DEBUG;
+            break;
+        default: // should not be reached
+            printf(ANSI_C_RED MISCSTR_BADERROR ANSI_C_RESET);
+            return;
+    }
+    char* ex = extra;
+    if (!extra) ex = "";
+    printf("%s 0x%04x: %s %s\n" ANSI_C_RESET, type, code, msg, ex);
+    return;
 }

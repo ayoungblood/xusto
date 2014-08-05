@@ -31,32 +31,24 @@
 
 #define STATE_F_DEBUG    0x80
 
+// Main return macros
+#define MAIN_RV_ERR      0x100
+
+// Types
+typedef struct {
+    // Interpreter state struct
+    uint8_t  iptr[2]; // instruction pointer
+    uint8_t  ivec[2]; // instruction vector
+    uint8_t  bcon[2]; // beacon position
+    uint8_t  warp[2]; // program space warp
+    uint8_t  flags; // state flag bitfield
+    uint8_t  pgm[256][256]; // program space
+    uint16_t pgmsize[2]; // program space dimensions
+    uint8_t* stack; // stack pointer, dynamic array
+    uint64_t stacksize; // allocated stack height
+} State;
+
 // Functions
-void message(const char* msg, int code, char* extra) {
-    char* type;
-    switch (code >> 8) {
-        case 0: // SHOULD NOT HAPPEN
-            type = ANSI_C_RED MSG_TYP_CATASTROPHIC;
-            break;
-        case 1: // ERROR
-            type = ANSI_C_RED MSG_TYP_ERROR;
-            break;
-        case 2: // WARNING
-            type = ANSI_C_YELLOW MSG_TYP_WARNING;
-            break;
-        case 3: // INFO
-            type = ANSI_C_GREEN MSG_TYP_INFO;
-            break;
-        case 4: // DEBUG
-            type = ANSI_C_GREEN MSG_TYP_DEBUG;
-            break;
-        default: // should not be reached
-            printf(ANSI_C_RED MSTR_BADERROR ANSI_C_RESET);
-            return;
-    }
-    char* ex = extra;
-    if (!extra) ex = "";
-    printf("%s 0x%04x: %s %s\n" ANSI_C_RESET, type, code, msg, ex);
-    return;
-}
+void execute(char* c, State* s);
+void message(const char* msg, int code, char* extra);
 
