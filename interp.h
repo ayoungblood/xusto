@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-// #include <unistd.h>
+#include <unistd.h>
 #include <stdlib.h>
 
 #include "i18n/lang-en.h"
@@ -22,8 +22,13 @@
 #define ANSI_C_WHITE   "\x1b[1;37m"
 #define ANSI_C_RESET   "\x1b[0m"
 
-// The maximum length of the stack
-#define LIMIT_STACKLEN   16384
+// Initial stack length at program start
+#define STACKLEN_INITIAL 64
+// Maximum length of the stack
+#define STACKLEN_LIMIT   16384
+
+// Sluggishness of execution
+#define SLUGGISHNESS     5000
 
 // Interpreter state flag defines
 #define STATE_F_EXECUTE  0x01
@@ -33,6 +38,12 @@
 
 // Main return macros
 #define MAIN_RV_ERR      0x100
+
+// Convenience macros
+#define PUSHVAL(v,s)    (*(++s->stack) = v)
+#define POPVAL(s)       ((s->stack == s->stackbase)?0:*((s->stack)--))
+#define PEEKVAL(s)      ((s->stack == s->stackbase)?0:*(s->stack))
+#define CURRENTINSTR(s) (s->pgm[s->iptr[0]][s->iptr[1]])
 
 // Types
 typedef struct {
@@ -50,6 +61,8 @@ typedef struct {
 } State;
 
 // Functions
-void execute(char* c, State* s);
+void execute(State* s); // execute the current instruction
+void update(State* s); // update the interpreter state
 void message(const char* msg, int code, char* extra);
+void processHeader(State* s, char* h); // ingest a given header line
 
