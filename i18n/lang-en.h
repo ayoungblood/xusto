@@ -26,6 +26,7 @@
 #define MSG_INFO_EOX         "Reached end of execution, halting.", 0x300
 // DEBUG MESSAGES
 #define MSG_DBG_ENABLED      "Debug messages enabled", 0x400
+#define MSG_DBG_EOX          "End of execution, halting.", 0x401
 
 // MISC STRINGS
 #define MISCSTR_BADERROR "Illegal error, seek help"

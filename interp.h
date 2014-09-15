@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "i18n/lang-en.h"
 
@@ -28,7 +29,7 @@
 #define STACKLEN_LIMIT   16384
 
 // Sluggishness of execution
-#define SLUGGISHNESS     5000
+#define SLUGGISHNESS     200
 
 // Interpreter state flag defines
 #define STATE_F_EXECUTE  0x01
@@ -49,15 +50,15 @@
 typedef struct {
     // Interpreter state struct
     uint8_t  iptr[2]; // instruction pointer
-    uint8_t  ivec[2]; // instruction vector
+    int8_t   ivec[2]; // instruction vector
     uint8_t  bcon[2]; // beacon position
-    uint8_t  warp[2]; // program space warp
+    int8_t   warp[2]; // program space warp
     uint8_t  flags; // state flag bitfield
     uint8_t  pgm[256][256]; // program space
-    uint16_t pgmsize[2]; // program space dimensions
+    uint8_t  pgmsize[2]; // program space dimensions
     uint8_t* stack; // stack pointer, dynamic array
     uint8_t* stackbase; // bottom of stack
-    uint64_t stackmax; // allocated length of stack
+    uint16_t stackmax; // allocated length of stack
 } State;
 
 // Functions
@@ -65,4 +66,6 @@ void execute(State* s); // execute the current instruction
 void update(State* s); // update the interpreter state
 void message(const char* msg, int code, char* extra);
 void processHeader(State* s, char* h); // ingest a given header line
+uint8_t random_u8(void); // generate a random value
+uint8_t moonphase(void); // get the current phase of the moon, 0-29
 

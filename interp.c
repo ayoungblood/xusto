@@ -14,10 +14,10 @@
 int main(int argc, char **argv) {
     State s;
     int i = 0, j = 0;
-    
+
     // miscellaneous interpreter housekeeping
     setbuf(stdout, NULL); // disable buffering on stdout
-    
+
     // initialize interpreter state
     // values may be overridden by source file header
     s.iptr[0] = s.iptr[1] = 0;
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     s.stack = malloc(sizeof(s.stack)*STACKLEN_INITIAL);
     s.stackbase = s.stack;
     s.stackmax = 64;
-    
+
     // validate args, if they exist
     if (argc == 1) {
         message(MSG_ERR_NOSOURCE,0);
@@ -85,34 +85,38 @@ int main(int argc, char **argv) {
     }
     s.pgmsize[1] = j;
     fclose(fsource);
-    
+
     // if debug, print program space
     if (s.flags & STATE_F_DEBUG) {
-        printf("\n#### " MISCSTR_PGMSPACE " ####\n");
+        printf("\n" ANSI_C_MAGENTA "#### " MISCSTR_PGMSPACE " ####" ANSI_C_RESET "\n");
         for (j=0; j<s.pgmsize[1]; ++j) {
             for (i=0; i<s.pgmsize[0]; ++i) {
                 printf("%c",s.pgm[i][j]);
             }
             printf("\n");
         }
-        printf("#### " MISCSTR_PGMSIZE ": [0x%02X,0x%02X] ####\n\n",s.pgmsize[0],s.pgmsize[1]);
+        printf(ANSI_C_MAGENTA "#### " MISCSTR_PGMSIZE ": [0x%02X,0x%02X] ####" ANSI_C_RESET "\n\n",
+            s.pgmsize[0],s.pgmsize[1]);
     }
-    
+
     // run
     while (s.flags & STATE_F_EXECUTE) {
         execute(&s);
         update(&s);
         usleep(SLUGGISHNESS);
     }
-    printf("\n");
-    message(MSG_INFO_EOX,0);
+    if (s.flags & STATE_F_DEBUG) {
+        printf("\n");
+        message(MSG_DBG_EOX,0);
+    }
     return 0;
 }
 /********
  * Execute the current instruction
  */
 void execute(State* s) {
-    uint8_t x;
+    uint8_t x, y, i;
+    int v, w;
     char c[4];
     if (s->flags & STATE_F_PUSHCHAR && CURRENTINSTR(s) != '"') {
         PUSHVAL(CURRENTINSTR(s),s);
@@ -155,7 +159,7 @@ void execute(State* s) {
             x = POPVAL(s);
             PUSHVAL(POPVAL(s)%x,s);
             break;
-        //other operators
+        // binary & logical operators
         case '&':
             x = POPVAL(s);
             PUSHVAL(POPVAL(s)&x,s);
@@ -182,7 +186,16 @@ void execute(State* s) {
         case '!':
             PUSHVAL(!POPVAL(s),s);
             break;
-        // directions
+        // comparison operators
+        case 'G': // greater than
+            x = POPVAL(s);
+            POPVAL(s) > x ? PUSHVAL(1,s) : PUSHVAL(0,s);
+            break;
+        case '=': // equality
+            x = POPVAL(s);
+            POPVAL(s) == x ? PUSHVAL(1,s) : PUSHVAL(0,s);
+            break;
+        // flow control & branching
         case '>':
             s->ivec[0] = 1;
             s->ivec[1] = 0;
@@ -192,14 +205,94 @@ void execute(State* s) {
             s->ivec[1] = 1;
             break;
         case '<':
-            s->ivec[0] = 255;
-            s->ivec[1] = 0;
+            s->ivec[0] = -1;
+            s->ivec[1] =  0;
             break;
         case '^':
-            s->ivec[0] = 0;
-            s->ivec[1] = 255;
+            s->ivec[0] =  0;
+            s->ivec[1] = -1;
+            break;
+        case 'x':
+            s->ivec[0] = POPVAL(s);
+            break;
+        case 'y':
+            s->ivec[1] = POPVAL(s);
+            break;
+        case 'B':
+            s->ivec[0] = -s->ivec[0];
+            s->ivec[1] = -s->ivec[1];
+            break;
+        case '_': // teleport
+            s->iptr[0] += s->ivec[0];
+            s->iptr[1] += s->ivec[1];
+            break;
+        case 'T': // branch left/right
+            if (POPVAL(s)) {
+                s->ivec[0] = 1;
+                s->ivec[1] = 0;
+            } else {
+                s->ivec[0] = -1;
+                s->ivec[1] =  0;
+            }
+            break;
+        case 'K': // branch up/down
+            if (POPVAL(s)) {
+                s->ivec[0] = 0;
+                s->ivec[1] = 1;
+            } else {
+                s->ivec[0] =  0;
+                s->ivec[1] = -1;
+            }
+            break;
+        case 'Q': // teleport 50% of the time
+            if (random_u8() < 128) {
+                s->iptr[0] += s->ivec[0];
+                s->iptr[1] += s->ivec[1];
+            }
+            break;
+        // stack manipulation
+        case 'S': // swap
+            *(s->stack) ^= *(s->stack-1);
+            *(s->stack-1) ^= *(s->stack);
+            *(s->stack) ^= *(s->stack-1);
+            break;
+        case 'P': // pop
+            POPVAL(s);
+            break;
+        case 'D': // duplicate
+            PUSHVAL(PEEKVAL(s),s);
+            break;
+        // execution control
+        case ' ': // nop
+            break;
+        case 'H': // halt
+            s->flags &= ~STATE_F_EXECUTE;
+            break;
+        case 'w': // wait
+            // this instruction will pause execution for
+            // 37ms multiplied by the current phase of the moon
+            x = moonphase();
+            for (i=0;i<x;++i) {
+                usleep(37*1000);
+            }
             break;
         // input/output
+        case 'i': // read in an integer from stdin and push it
+            v = scanf("%d",&w);
+            if (v != EOF) { // if we got anything, push
+                PUSHVAL((uint8_t)(w%256),s);
+            }
+            // clear buffer until newline
+            while (getchar() != '\n');
+            break;
+        case 's': // read in a character from stdin and push it
+            v = scanf("%c",c);
+            if (v != EOF) { // if we got anything, push
+                PUSHVAL((uint8_t)*c,s);
+            }
+            // clear buffer until newline
+            while (getchar() != '\n');
+            break;
         case '[':
             printf("%i", POPVAL(s));
             break;
@@ -212,10 +305,31 @@ void execute(State* s) {
         case '}':
             printf("%c", PEEKVAL(s));
             break;
-        // other
-        case '_': // teleport
-            s->iptr[0] += s->ivec[0];
-            s->iptr[1] += s->ivec[1];
+        // program space modification
+        case 'm': // mutate [x,y] to v
+            v = POPVAL(s);
+            y = POPVAL(s);
+            x = POPVAL(s);
+            s->pgm[x][y] = (uint8_t)v;
+            break;
+        case 'g': // get: push value at [x,y]
+            y = POPVAL(s);
+            x = POPVAL(s);
+            PUSHVAL(s->pgm[x][y],s);
+            break;
+        // other stuff
+        case '`': // set warp
+            y = POPVAL(s);
+            s->warp[0] = POPVAL(s);
+            s->warp[1] = y;
+            break;
+        case '#': // store beacon
+            s->bcon[0] = s->iptr[0];
+            s->bcon[1] = s->iptr[1];
+            break;
+        case '@': // goto beacon
+            s->iptr[0] = s->bcon[0];
+            s->iptr[1] = s->bcon[1];
             break;
         case '"': // toggle PUSHCHAR
             s->flags ^= STATE_F_PUSHCHAR;
@@ -223,11 +337,6 @@ void execute(State* s) {
         case '?': // toggle DEBUG
             s->flags ^= STATE_F_DEBUG;
             message(MSG_DBG_ENABLED,0);
-            break;
-        case 'H': // halt
-            s->flags &= ~STATE_F_EXECUTE;
-            break;
-        case ' ': // nop
             break;
         default: // unrecognized instructions
             (void)sprintf(c,": %c",CURRENTINSTR(s));
@@ -240,18 +349,31 @@ void execute(State* s) {
  * Update the interpreter state
  */
 void update(State* s) {
-    // detect wraparound in order to assign warp
-    /*
-    if ((int)s->iptr[0] + s->ivec[0] > 255) {
-        // we are wrapping over in +x
-        s->iptr[1] += s->warp[1];
-        printf("wrapping in +x, warp applied\n");
+    // Many things are still a bit broken in here,
+    // and determining precedence will be a difficult task
+    // also, TODO: fix signed warp and warp behaviour
+    int tmpiptr[2], tmpwarp[2] = {0,0};
+    tmpiptr[0] = (int)s->iptr[0] + s->ivec[0];
+    tmpiptr[1] = (int)s->iptr[1] + s->ivec[1];
+    while (tmpiptr[0] > s->pgmsize[0]-1) {
+        tmpiptr[0] -= s->pgmsize[0];
+        tmpwarp[1] += s->warp[1];
     }
-    */
-    // advance instruction pointer
-    s->iptr[0] += s->ivec[0];
-    s->iptr[1] += s->ivec[1];
-    return;
+    while (tmpiptr[0] < 0) {
+        tmpiptr[0] += s->pgmsize[0];
+        tmpwarp[1] -= s->warp[1];
+    }
+    while (tmpiptr[1] > s->pgmsize[1]-1) {
+        tmpiptr[1] -= s->pgmsize[1];
+        tmpwarp[0] += s->warp[0];
+    }
+    while (tmpiptr[1] < 0) {
+        tmpiptr[1] += s->pgmsize[1];
+        tmpwarp[0] -= s->pgmsize[0];
+    }
+
+    s->iptr[0] = tmpiptr[0] + tmpwarp[0];
+    s->iptr[1] = tmpiptr[1] + tmpwarp[1];
 }
 /********
  * Print messages to the user
@@ -327,7 +449,7 @@ void processHeader(State* s, char* h) {
             (void)sprintf(c,": %s","bx");
             message(MSG_WRN_HEADERTOKEN,c);
         } else {
-            s->warp[0] = (uint8_t)v;
+            s->bcon[0] = (uint8_t)v;
         }
     }
     // beacon y
@@ -337,7 +459,7 @@ void processHeader(State* s, char* h) {
             (void)sprintf(c,": %s","by");
             message(MSG_WRN_HEADERTOKEN,c);
         } else {
-            s->warp[1] = (uint8_t)v;
+            s->bcon[1] = (uint8_t)v;
         }
     }
     // iptr x
@@ -409,4 +531,26 @@ void processHeader(State* s, char* h) {
         printf(MISCSTR_IVEC ": [0x%02X,0x%02X]\n",s->ivec[0],s->ivec[1]);
         printf(MISCSTR_PGMSIZE ": [0x%02X,0x%02X]\n",s->pgmsize[0],s->pgmsize[1]);
     }
+}
+/********
+ * Generate a random value
+ */
+uint8_t random_u8(void) {
+    // using a weak, untested algorithm from
+    // http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=126506
+    // TODO fix
+    static uint8_t s=0xd0, a=0x89;
+    s^=s<<3;
+    s^=s>>5;
+    s^=a++>>2;
+    return s;
+}
+/********
+ * Get the current phase of the moon
+ * This is only guaranteed to work on Unix- and Posix-compliant systems
+ */
+uint8_t moonphase(void) {
+    time_t now = time(NULL); // epoch time in s,
+    time_t nm = (time_t)1389126900;
+    return ((now-nm) % 2551443)/(24*3600) + 1;
 }
