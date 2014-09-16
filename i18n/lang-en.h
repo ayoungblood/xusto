@@ -37,5 +37,6 @@
 #define MISCSTR_IVEC     "Instruction vector"
 #define MISCSTR_PGMSIZE  "Program size"
 #define MISCSTR_PGMSPACE "Program space"
+#define MISCSTR_OUCH     "Ouch!"
 
 #endif

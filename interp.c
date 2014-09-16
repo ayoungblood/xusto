@@ -305,6 +305,9 @@ void execute(State* s) {
         case '}':
             printf("%c", PEEKVAL(s));
             break;
+        case 'W': // whack the interpreter
+            printf("\n" MISCSTR_OUCH "\n");
+            break;
         // program space modification
         case 'm': // mutate [x,y] to v
             v = POPVAL(s);

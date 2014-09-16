@@ -88,6 +88,7 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 	]: pop c; print c as ASCII character
 	{: peek i; print i as integer
 	}: peek c; print c as ASCII character
+	W: whacks the interpreter, causing it to say "Ouch!"
 	
 	# PROGRAM SPACE MODIFICATION
 	
