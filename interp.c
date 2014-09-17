@@ -7,12 +7,14 @@
  *     filename - path to source file to be executed
  * Options:
  *     -d - set debug flag
+ *     -v - set verbose flag
  */
 
 #include "interp.h"
 
 int main(int argc, char **argv) {
     State s;
+    Options opts;
     int i = 0, j = 0;
 
     // miscellaneous interpreter housekeeping
@@ -34,6 +36,11 @@ int main(int argc, char **argv) {
     s.stackbase = s.stack;
     s.stackmax = 64;
 
+    // initialize opts (keeps track of command line options)
+    // many of these override values set by header or defaults
+    opts.flags = 0;
+    opts.flagsMask = 0;
+
     // validate args, if they exist
     if (argc == 1) {
         message(MSG_ERR_NOSOURCE,0);
@@ -41,8 +48,13 @@ int main(int argc, char **argv) {
     } else {
         for (i=0; i<argc-2; ++i) {
             switch (argv[i+1][1]) {
-                case 'd': // debug
-                    s.flags |= STATE_F_DEBUG;
+                case 'd': // -d: force debug
+                    opts.flags |= STATE_F_DEBUG;
+                    opts.flagsMask |= STATE_F_DEBUG;
+                    break;
+                case 'v': // -v: verbose
+                    opts.flags |= STATE_F_VERBOSE;
+                    opts.flagsMask |= STATE_F_VERBOSE;
                     break;
                 default:
                     message(MSG_WRN_BADOPTION,&argv[i+1][1]);
@@ -86,17 +98,29 @@ int main(int argc, char **argv) {
     s.pgmsize[1] = j;
     fclose(fsource);
 
-    // if debug, print program space
-    if (s.flags & STATE_F_DEBUG) {
-        printf("\n" ANSI_C_MAGENTA "#### " MISCSTR_PGMSPACE " ####" ANSI_C_RESET "\n");
-        for (j=0; j<s.pgmsize[1]; ++j) {
-            for (i=0; i<s.pgmsize[0]; ++i) {
-                printf("%c",s.pgm[i][j]);
+    // override flags with command line options
+    s.flags |= opts.flags & opts.flagsMask;
+    // s.flags &= ~opts.flags | ~opts.flagsMask;
+
+    // if debug or verbose, print out header settings
+    if (s.flags & STATE_F_DEBUG || s.flags & STATE_F_VERBOSE) {
+        printf(ANSI_C_MAGENTA MISCSTR_FLAGS ": 0x%02X\n",s.flags);
+        printf(MISCSTR_WARP ": [0x%02X,0x%02X]\n",s.warp[0],s.warp[1]);
+        printf(MISCSTR_BEACON ": [0x%02X,0x%02X]\n",s.bcon[0],s.bcon[1]);
+        printf(MISCSTR_IPTR ": [0x%02X,0x%02X]\n",s.iptr[0],s.iptr[1]);
+        printf(MISCSTR_IVEC ": [0x%02X,0x%02X]\n",s.ivec[0],s.ivec[1]);
+        printf(MISCSTR_PGMSIZE ": [0x%02X,0x%02X]\n" ANSI_C_RESET,s.pgmsize[0],s.pgmsize[1]);
+        if (s.flags & STATE_F_DEBUG) {
+            printf("\n" ANSI_C_MAGENTA "#### " MISCSTR_PGMSPACE " ####" ANSI_C_RESET "\n");
+            for (j=0; j<s.pgmsize[1]; ++j) {
+                for (i=0; i<s.pgmsize[0]; ++i) {
+                    printf("%c",s.pgm[i][j]);
+                }
+                printf("\n");
             }
-            printf("\n");
+            printf(ANSI_C_MAGENTA "#### " MISCSTR_PGMSIZE ": [0x%02X,0x%02X] ####" ANSI_C_RESET "\n\n",
+                s.pgmsize[0],s.pgmsize[1]);
         }
-        printf(ANSI_C_MAGENTA "#### " MISCSTR_PGMSIZE ": [0x%02X,0x%02X] ####" ANSI_C_RESET "\n\n",
-            s.pgmsize[0],s.pgmsize[1]);
     }
 
     // run
@@ -106,11 +130,14 @@ int main(int argc, char **argv) {
         usleep(SLUGGISHNESS);
     }
     if (s.flags & STATE_F_DEBUG) {
-        printf("\n");
         message(MSG_DBG_EOX,0);
+        dumpStack(&s);
+    } else if (s.flags & STATE_F_VERBOSE) {
+        message(MSG_INFO_EOX,0);
     }
     return 0;
 }
+
 /********
  * Execute the current instruction
  */
@@ -348,6 +375,7 @@ void execute(State* s) {
     }
     return;
 }
+
 /********
  * Update the interpreter state
  */
@@ -408,6 +436,7 @@ void message(const char* msg, int code, char* extra) {
     printf("%s 0x%04x: %s %s\n" ANSI_C_RESET, type, code, msg, ex);
     return;
 }
+
 /********
  * Process header string
  */
@@ -525,16 +554,26 @@ void processHeader(State* s, char* h) {
             s->pgmsize[1] = (uint8_t)v;
         }
     }
-    // if debug, print out header settings
-    if (s->flags & STATE_F_DEBUG) {
-        printf(MISCSTR_FLAGS ": 0x%02X\n",s->flags);
-        printf(MISCSTR_WARP ": [0x%02X,0x%02X]\n",s->warp[0],s->warp[1]);
-        printf(MISCSTR_BEACON ": [0x%02X,0x%02X]\n",s->bcon[0],s->bcon[1]);
-        printf(MISCSTR_IPTR ": [0x%02X,0x%02X]\n",s->iptr[0],s->iptr[1]);
-        printf(MISCSTR_IVEC ": [0x%02X,0x%02X]\n",s->ivec[0],s->ivec[1]);
-        printf(MISCSTR_PGMSIZE ": [0x%02X,0x%02X]\n",s->pgmsize[0],s->pgmsize[1]);
-    }
 }
+
+/********
+ * Print the contents of the stack
+ */
+void dumpStack(State* s) {
+    uint8_t *p, v;
+    printf("stack: %p, stackbase: %p, diff: %ld\n" ANSI_C_RED,s->stack,s->stackbase,s->stack-s->stackbase);
+    while (s->stack > s->stackbase) {
+        p = s->stack;
+        v = POPVAL(s);
+        printf("%p: 0x%02X",p,v);
+        if (v >= 32 && v < 127) {
+            printf("  %c",(char)v);
+        }
+        printf("\n");
+    }
+    printf(ANSI_C_RESET);
+}
+
 /********
  * Generate a random value
  */
@@ -548,6 +587,7 @@ uint8_t random_u8(void) {
     s^=a++>>2;
     return s;
 }
+
 /********
  * Get the current phase of the moon
  * This is only guaranteed to work on Unix- and Posix-compliant systems

@@ -4,17 +4,17 @@ lang2d Design
 Assuming an interpreter implementation in a C-style language.
 
 #### Flags
-	
+
 STATE_F_EXECUTE: if set, the interpreter will continue to execute instructions. If unset, the interpreter will halt.
 
 STATE_F_PUSHCHAR: if set, each character encountered by the instruction pointer will be pushed to the stack instead of interpreted as an instruction, unless is it the character '"'.
 
 STATE_F_DEBUG: if set, debug messages will be printed for significant interpreter actions.
-	
+
 #### Instruction Set
 
 	# VALUES
-	
+
 	0: push 0x00
 	1: push 0x01
 	2: push 0x02
@@ -31,17 +31,17 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 	d: push 0x0d
 	e: push 0x0e
 	f: push 0x0f
-	
+
 	# MATH OPERATORS
-	
+
 	+: pop a, b; push b+a
 	-: pop a, b; push b-a
 	*: pop a, b; push b*a
 	/: pop a, b; push b/a
 	%: pop a, b; push b%a
-	
+
 	# BINARY & LOGICAL OPERATORS
-	
+
 	&: pop a, b; push bitwise b AND a
 	|: pop a, b; push bitwise b OR a
 	r: pop a, b; push bitwise b XOR a
@@ -49,14 +49,14 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 	R: pop a, b; push bitwise b >> a
 	~: pop a; push bitwise NOT of a
 	!: pop a; push logical NOT of a
-	
+
 	# COMPARISON OPERATORS
-	
+
 	G: pop a, b; push 1 if b GT a, else push 0
 	=: pop a, b; push a==b
-	
+
 	# FLOW CONTROL & BRANCHING
-	
+
 	<: set ivec to [255,0]
 	^: set ivec to [0,255]
 	>: set ivec to [1,0]
@@ -68,20 +68,20 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 	T: pop a; set ivec < if 0 else set ivec >
 	K: pop a; set ivec ^ if 0 else set ivec v
 	Q: 50% chance of teleport
-	
+
 	# STACK MANIPULATION
-	
+
 	S: pop a, b; push a, b ("swap")
 	P: pop a ("pop")
 	D: peek a; push a ("duplicate")
-	
+
 	# EXECUTION CONTROL
 	 : nop
 	H: toggle interpreter execution state ("halt")
 	w: wait 37ms * (phase of moon as [0-29])
-	
+
 	# INPUT/OUTPUT
-	
+
 	i: read in integer i; push i
 	s: read in char c; push c
 	[: pop i; print i as integer
@@ -89,21 +89,21 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 	{: peek i; print i as integer
 	}: peek c; print c as ASCII character
 	W: whacks the interpreter, causing it to say "Ouch!"
-	
+
 	# PROGRAM SPACE MODIFICATION
-	
+
 	m: pop v, y, x; write v to [x,y] ("mutate")
 	g: pop y, x; push value at [x,y] ("get")
-	
+
 	# OTHER STUFF
-	
+
 	E: pop a; execute a ("execute")
 	`: pop y, x; set warp to [x,y]
 	#: store iptr to bcon ("store beacon")
 	@: set iptr to bcon ("return to beacon")
 	": set/unset pushchar flag
 	?: set/unset debug flag
-	
+
 x/0, x%0 are math exceptions  
 executing a non-existent instruction is an exception  
 arithmetic overflows wrap around and are silent  
@@ -117,7 +117,7 @@ popping an empty stack is an exception
 **Header format**
 
 	\f:0/wx:0/wy:0/bx:0/by:0/vx:0/vy:0/px:0/py:0/sx:0/sy:0/
-	
+
 A file is composed of token:value pairs (separated by colors). Each pair is separated by a forward slash. Tokens are as follows:
 
 	f:  flags
@@ -132,3 +132,6 @@ A file is composed of token:value pairs (separated by colors). Each pair is sepa
 	sx: pgmsize x
 	sy: pgmsize y
 
+#### Misc
+
+Note that source files _must_ end with a newline. Just like any sane *nix thingy. Ignoring this will have nasty consequences, typically involving the last line of source being ignored by the interpreter.

@@ -35,6 +35,7 @@
 #define STATE_F_EXECUTE  0x01
 #define STATE_F_PUSHCHAR 0x02
 
+#define STATE_F_VERBOSE  0x40
 #define STATE_F_DEBUG    0x80
 
 // Main return macros
@@ -61,11 +62,17 @@ typedef struct {
     uint16_t stackmax; // allocated length of stack
 } State;
 
+typedef struct {
+    // Command line options
+    uint8_t flags;
+    uint8_t flagsMask;
+} Options;
+
 // Functions
 void execute(State* s); // execute the current instruction
 void update(State* s); // update the interpreter state
 void message(const char* msg, int code, char* extra);
 void processHeader(State* s, char* h); // ingest a given header line
+void dumpStack(State* s); // print contents of stack
 uint8_t random_u8(void); // generate a random value
-uint8_t moonphase(void); // get the current phase of the moon, 0-29
-
+uint8_t moonphase(void); // get the current phase of the moon, 0-2
