@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     s.pgmsize[0] = s.pgmsize[1] = 0;
     s.stack = malloc(sizeof(s.stack)*STACKLEN_INITIAL);
     s.stackbase = s.stack;
-    s.stackmax = 64;
+    s.stackmax = STACKLEN_INITIAL;
 
     // initialize opts (keeps track of command line options)
     // many of these override values set by header or defaults
@@ -128,14 +128,25 @@ int main(int argc, char **argv) {
         execute(&s);
         update(&s);
         usleep(SLUGGISHNESS);
+        if (s.flags & STATE_F_EXCEPTION) {
+            break;
+        }
     }
+    // if there is an exception, there is likely no stack to dump
+    // inform user and exit posthaste
+    if (s.flags & STATE_F_EXCEPTION) {
+        message(MSG_ERR_EXITEXC,0);
+        return MAIN_RV_CRASH;
+    }
+
     if (s.flags & STATE_F_DEBUG) {
         message(MSG_DBG_EOX,0);
         dumpStack(&s);
     } else if (s.flags & STATE_F_VERBOSE) {
         message(MSG_INFO_EOX,0);
     }
-    return 0;
+
+    return MAIN_RV_CAREFREE;
 }
 
 /********
@@ -405,6 +416,20 @@ void update(State* s) {
 
     s->iptr[0] = tmpiptr[0] + tmpwarp[0];
     s->iptr[1] = tmpiptr[1] + tmpwarp[1];
+
+    // if we're in danger of falling off the end of the stack,
+    // grow the stack carefully. Magic number 8 is magic
+    if (s->stack-s->stackbase > s->stackmax-8) {
+        s->stackmax += STACKLEN_INITIAL;
+        if (s->flags & STATE_F_DEBUG) {message(MSG_DBG_STACKRESIZE,0);}
+        long int diff = s->stack-s->stackbase;
+        s->stackbase = (uint8_t*)realloc(s->stackbase, s->stackmax*sizeof(uint8_t));
+        if (!s->stackbase) {
+            message(MSG_ERR_STACKALLOC,0);
+            s->flags |= STATE_F_EXCEPTION;
+        }
+        s->stack = s->stackbase + diff;
+    }
 }
 /********
  * Print messages to the user
@@ -595,5 +620,7 @@ uint8_t random_u8(void) {
 uint8_t moonphase(void) {
     time_t now = time(NULL); // epoch time in s,
     time_t nm = (time_t)1389126900;
-    return ((now-nm) % 2551443)/(24*3600) + 1;
+    uint8_t phase = ((now-nm) % 2551443)/(24*3600) + 1;
+    if (phase > 29) {message(MSG_WRN_MOONPHASE,0);}
+    return phase;
 }

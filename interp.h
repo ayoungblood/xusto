@@ -24,22 +24,25 @@
 #define ANSI_C_RESET   "\x1b[0m"
 
 // Initial stack length at program start
-#define STACKLEN_INITIAL 64
+#define STACKLEN_INITIAL  8
 // Maximum length of the stack
-#define STACKLEN_LIMIT   16384
+#define STACKLEN_LIMIT    65536
 
 // Sluggishness of execution
-#define SLUGGISHNESS     200
+#define SLUGGISHNESS      37
 
 // Interpreter state flag defines
-#define STATE_F_EXECUTE  0x01
-#define STATE_F_PUSHCHAR 0x02
+#define STATE_F_EXECUTE   0x01
+#define STATE_F_PUSHCHAR  0x02
 
-#define STATE_F_VERBOSE  0x40
-#define STATE_F_DEBUG    0x80
+#define STATE_F_EXCEPTION 0x20
+#define STATE_F_VERBOSE   0x40
+#define STATE_F_DEBUG     0x80
 
 // Main return macros
-#define MAIN_RV_ERR      0x100
+#define MAIN_RV_CAREFREE  0x00
+#define MAIN_RV_ERR       0x80
+#define MAIN_RV_CRASH     0x81
 
 // Convenience macros
 #define PUSHVAL(v,s)    (*(++s->stack) = v)
