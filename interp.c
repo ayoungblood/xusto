@@ -411,7 +411,7 @@ void update(State* s) {
     }
     while (tmpiptr[1] < 0) {
         tmpiptr[1] += s->pgmsize[1];
-        tmpwarp[0] -= s->pgmsize[0];
+        tmpwarp[0] -= s->warp[0];
     }
 
     s->iptr[0] = tmpiptr[0] + tmpwarp[0];
