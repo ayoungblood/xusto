@@ -36,7 +36,7 @@
 #define MISCSTR_BADERROR "Illegal error, seek help"
 #define MISCSTR_FLAGS    "Flags"
 #define MISCSTR_WARP     "Warp"
-#define MISCSTR_BEACON   "Beacon"
+#define MISCSTR_PORTAL   "Portal"
 #define MISCSTR_IPTR     "Instruction pointer"
 #define MISCSTR_IVEC     "Instruction vector"
 #define MISCSTR_PGMSIZE  "Program size"

@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     s.iptr[0] = s.iptr[1] = 0;
     s.ivec[0] = 1;
     s.ivec[1] = 0;
-    s.bcon[0] = s.bcon[1] = 0;
+    s.prtl[0] = s.prtl[1] = 0;
     s.warp[0] = s.warp[1] = 0;
     s.flags = 0x00 | STATE_F_EXECUTE;
     for (i=0; i<256; ++i)
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
     if (s.flags & STATE_F_DEBUG || s.flags & STATE_F_VERBOSE) {
         printf(ANSI_C_MAGENTA MISCSTR_FLAGS ": 0x%02X\n",s.flags);
         printf(MISCSTR_WARP ": [0x%02X,0x%02X]\n",s.warp[0],s.warp[1]);
-        printf(MISCSTR_BEACON ": [0x%02X,0x%02X]\n",s.bcon[0],s.bcon[1]);
+        printf(MISCSTR_PORTAL ": [0x%02X,0x%02X]\n",s.prtl[0],s.prtl[1]);
         printf(MISCSTR_IPTR ": [0x%02X,0x%02X]\n",s.iptr[0],s.iptr[1]);
         printf(MISCSTR_IVEC ": [0x%02X,0x%02X]\n",s.ivec[0],s.ivec[1]);
         printf(MISCSTR_PGMSIZE ": [0x%02X,0x%02X]\n" ANSI_C_RESET,s.pgmsize[0],s.pgmsize[1]);
@@ -364,13 +364,13 @@ void execute(State* s) {
             s->warp[0] = POPVAL(s);
             s->warp[1] = y;
             break;
-        case '#': // store beacon
-            s->bcon[0] = s->iptr[0];
-            s->bcon[1] = s->iptr[1];
+        case '#': // drop portal
+            s->prtl[0] = s->iptr[0];
+            s->prtl[1] = s->iptr[1];
             break;
-        case '@': // goto beacon
-            s->iptr[0] = s->bcon[0];
-            s->iptr[1] = s->bcon[1];
+        case '@': // use portal
+            s->iptr[0] = s->prtl[0];
+            s->iptr[1] = s->prtl[1];
             break;
         case '"': // toggle PUSHCHAR
             s->flags ^= STATE_F_PUSHCHAR;
@@ -499,24 +499,24 @@ void processHeader(State* s, char* h) {
             s->warp[1] = (uint8_t)v;
         }
     }
-    // beacon x
-    token = strstr(h,"bx:");
+    // portal x
+    token = strstr(h,"lx:");
     if (token) {
         if (sscanf(token+3, "0x%02X",&v) != 1) {
             (void)sprintf(c,": %s","bx");
             message(MSG_WRN_HEADERTOKEN,c);
         } else {
-            s->bcon[0] = (uint8_t)v;
+            s->prtl[0] = (uint8_t)v;
         }
     }
-    // beacon y
-    token = strstr(h,"by:");
+    // portal y
+    token = strstr(h,"ly:");
     if (token) {
         if (sscanf(token+3, "0x%02X",&v) != 1) {
             (void)sprintf(c,": %s","by");
             message(MSG_WRN_HEADERTOKEN,c);
         } else {
-            s->bcon[1] = (uint8_t)v;
+            s->prtl[1] = (uint8_t)v;
         }
     }
     // iptr x

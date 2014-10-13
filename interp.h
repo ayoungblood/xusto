@@ -55,7 +55,7 @@ typedef struct {
     // Interpreter state struct
     uint8_t  iptr[2]; // instruction pointer
     int8_t   ivec[2]; // instruction vector
-    uint8_t  bcon[2]; // beacon position
+    uint8_t  prtl[2]; // portal position
     int8_t   warp[2]; // program space warp
     uint8_t  flags; // state flag bitfield
     uint8_t  pgm[256][256]; // program space

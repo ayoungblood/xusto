@@ -76,6 +76,7 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 	D: peek a; push a ("duplicate")
 
 	# EXECUTION CONTROL
+
 	 : nop
 	H: toggle interpreter execution state ("halt")
 	w: wait 37ms * (phase of moon as [0-29])
@@ -99,8 +100,8 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 
 	E: pop a; execute a ("execute")
 	`: pop y, x; set warp to [x,y]
-	#: store iptr to bcon ("store beacon")
-	@: set iptr to bcon ("return to beacon")
+	#: store iptr to prtl ("drop portal")
+	@: set iptr to prtl ("use portal")
 	": set/unset pushchar flag
 	?: set/unset debug flag
 
@@ -123,8 +124,8 @@ A file is composed of token:value pairs (separated by colors). Each pair is sepa
 	f:  flags
 	wx: warp x
 	wy: warp y
-	bx: beacon x
-	by: beacon y
+	lx: portal x
+	ly: portal y
 	vx: ivec x
 	vy: ivec y
 	px: iptr x
