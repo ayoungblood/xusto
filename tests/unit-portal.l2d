@@ -1,14 +1,15 @@
-\f:0x01/
+\f:0x01/lx:0x20/ly:0x03/
 v unit-portal.l2d: test portal behaviour
-> "d2l.latrop-tinu" >D_vT]v a]
-v              # <  ^     <
-@>@_     #v_ [1< ^[0]aP<     >v@
-H   v  <  >2[                # ^
-H   @  ^    #_ # # #    [3    <
-H              > 4[ 0 v
+> "d2l.latrop-tinu"             >D_vT]v
+H                               ^     <
+H                      v[0]a    H@ <
+v              # <
+@>@_     #v_ [2< ^[1  P<     >v@
+H   v  <  >3[                # ^
+H   @  ^    #_ # # #    [4    <
+H              > 5[ 0 v
 Hv                   [#       <
-H  > 1y            v< >D4G _vT^
+H  > 1y            v< >D5G _vT^
 H>#^   @   v2    < @^     +1<
-   > 6[  1 >x   #^> 7[        v
-nothing left to check... :(   8
-H                      ]a  [9[<
+   > 7[  1 >x   #^> 8[        v
+H                         ]a[9<
