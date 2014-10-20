@@ -1,5 +1,5 @@
 /* interp.h
- * lang2d interpreter header
+ * Xusto interpreter header file
  *
  */
 

@@ -1,5 +1,5 @@
 /* i18n/lang-en.h
- * lang2d language defines for English
+ * English language defines for xusto
  *
  */
 

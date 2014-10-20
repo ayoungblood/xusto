@@ -4,7 +4,7 @@
 # Run unit tests through interpreter
 # TODO Verify output
 
-INTERP="../interp"
+INTERP="../c/xusto"
 
 tests=$(ls | grep unit-)
 

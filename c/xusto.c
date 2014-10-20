@@ -1,8 +1,8 @@
 /* interp.c
- * lang2d interpreter implementation
+ * Xusto interpreter implementation
  *
  * Invoke as:
- *     > lang2d filename
+ *     > xusto filename
  * Args:
  *     filename - path to source file to be executed
  * Options:
@@ -10,7 +10,7 @@
  *     -v - set verbose flag
  */
 
-#include "interp.h"
+#include "xusto.h"
 
 int main(int argc, char **argv) {
     State s;

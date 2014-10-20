@@ -1,4 +1,4 @@
-# Makefile for lang2d
+# Makefile for xusto
 #
 
 # compiler
@@ -8,7 +8,7 @@ CC = gcc
 CFLAGS = -g -Wall -Wextra
 
 # target
-TARGET = interp
+TARGET = xusto
 
 
 $(TARGET): $(TARGET).c
@@ -17,5 +17,4 @@ $(TARGET): $(TARGET).c
 all: $(TARGET)
 
 clean:
-	rm -Rv $(TARGET) *.dSYM
-	@echo Completed clean
+	rm -Rfv $(TARGET) *.dSYM
