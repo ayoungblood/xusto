@@ -1,5 +1,5 @@
-lang2d Design
-=============
+Xusto Interpreter Design
+========================
 
 Assuming an interpreter implementation in a C-style language.
 
