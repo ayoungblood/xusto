@@ -1,4 +1,4 @@
-/* interp.h
+/* xusto.h
  * Xusto interpreter header file
  *
  */

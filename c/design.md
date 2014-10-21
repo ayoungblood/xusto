@@ -93,8 +93,8 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 
 	# PROGRAM SPACE MODIFICATION
 
-	m: pop v, y, x; write v to [x,y] ("mutate")
-	g: pop y, x; push value at [x,y] ("get")
+	m: pop x, y, v; write v to [x,y] ("mutate")
+	g: pop x, y; push value at [x,y] ("get")
 
 	# OTHER STUFF
 

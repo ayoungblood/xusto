@@ -1,4 +1,4 @@
-/* interp.c
+/* xusto.c
  * Xusto interpreter implementation
  *
  * Invoke as:
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 void execute(State* s) {
     uint8_t x, y, i;
     int v, w;
-    char c[4];
+    char c[16];
     if (s->flags & STATE_F_PUSHCHAR && CURRENTINSTR(s) != '"') {
         PUSHVAL(CURRENTINSTR(s),s);
         return;
@@ -348,14 +348,14 @@ void execute(State* s) {
             break;
         // program space modification
         case 'm': // mutate [x,y] to v
-            v = POPVAL(s);
-            y = POPVAL(s);
             x = POPVAL(s);
+            y = POPVAL(s);
+            v = POPVAL(s);
             s->pgm[x][y] = (uint8_t)v;
             break;
         case 'g': // get: push value at [x,y]
-            y = POPVAL(s);
             x = POPVAL(s);
+            y = POPVAL(s);
             PUSHVAL(s->pgm[x][y],s);
             break;
         // other stuff
@@ -380,7 +380,7 @@ void execute(State* s) {
             message(MSG_DBG_ENABLED,0);
             break;
         default: // unrecognized instructions
-            (void)sprintf(c,": %c",CURRENTINSTR(s));
+            (void)sprintf(c,"%c (0x%2x)",CURRENTINSTR(s),CURRENTINSTR(s));
             message(MSG_ERR_BADINSTR,c);
             break;
     }
