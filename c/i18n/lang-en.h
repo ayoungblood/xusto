@@ -21,6 +21,7 @@
 #define MSG_ERR_BADINSTR     "You are making up instructions:", 0x104
 #define MSG_ERR_STACKALLOC   "No more memory, probable lossage", 0x105
 #define MSG_ERR_EXITEXC      "Exiting with exception; definite badness", 0x106
+#define MSG_ERR_INSTRDIM     "Not enough dimensions for instruction:", 0x107
 // WARNING MESSAGES
 #define MSG_WRN_BADOPTION    "Option may not exist:", 0x200
 #define MSG_WRN_HEADERTOKEN  "Header token parse failure", 0x201

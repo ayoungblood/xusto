@@ -384,6 +384,14 @@ void execute(State* s) {
             s->flags ^= STATE_F_DEBUG;
             message(MSG_DBG_ENABLED,0);
             break;
+        case '.': // tri-dimensional instruction, reserved
+            (void)sprintf(c,"%c",CURRENTINSTR(s));
+            message(MSG_ERR_INSTRDIM,c);
+            break;
+        case 'o': // tri-dimensional instruction, reserved
+            (void)sprintf(c,"%c",CURRENTINSTR(s));
+            message(MSG_ERR_INSTRDIM,c);
+            break;
         default: // unrecognized instructions
             (void)sprintf(c,"%c (0x%2x)",CURRENTINSTR(s),CURRENTINSTR(s));
             message(MSG_ERR_BADINSTR,c);
