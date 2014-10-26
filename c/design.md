@@ -79,7 +79,8 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 
 	 : nop
 	H: toggle interpreter execution state ("halt")
-	w: wait 37ms * (phase of moon as [0-29])
+	n: push the phase of the moon [0-29]
+	l: pop x; sleep for x pico centuries (3156µs, or ~π ms)
 
 	# INPUT/OUTPUT
 

@@ -306,13 +306,13 @@ void execute(State* s) {
         case 'H': // halt
             s->flags &= ~STATE_F_EXECUTE;
             break;
-        case 'w': // wait
-            // this instruction will pause execution for
-            // 37ms multiplied by the current phase of the moon
-            x = moonphase();
-            for (i=0;i<x;++i) {
-                usleep(37*1000);
-            }
+        case 'n': // push moon phase
+            PUSHVAL(moonphase(),s);
+            break;
+        case 'l': // delay
+            x = POPVAL(s);
+            for (i=0;i<x;++i)
+                usleep(3156);
             break;
         // input/output
         case 'i': // read in an integer from stdin and push it
