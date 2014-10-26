@@ -343,6 +343,11 @@ void execute(State* s) {
         case '}':
             printf("%c", PEEKVAL(s));
             break;
+        case '\'':
+            while ((v = POPVAL(s))) {
+                printf("%c",v);
+            }
+            break;
         case 'W': // whack the interpreter
             printf("\n" MISCSTR_OUCH "\n");
             break;
