@@ -1,17 +1,12 @@
 Xusto Interpreter Design
 ========================
 
-Assuming an interpreter implementation in a C-style language.
-
-#### Flags
-
-STATE_F_EXECUTE: if set, the interpreter will continue to execute instructions. If unset, the interpreter will halt.
-
-STATE_F_PUSHCHAR: if set, each character encountered by the instruction pointer will be pushed to the stack instead of interpreted as an instruction, unless is it the character '"'.
-
-STATE_F_DEBUG: if set, debug messages will be printed for significant interpreter actions.
+Language/interpreter design and documentation. Instructions and program idiosyncrasies may change at any time.
 
 #### Instruction Set
+
+All instructions, with associated operation and other notes.
+
 
 	# VALUES
 
@@ -63,22 +58,22 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 	v: set ivec to [0,1]
 	x: pop x, set ivec to [x,_]
 	y: pop y, set ivec to [_,y]
-	B: negates ivec ("reflect" or "bounce")
-	_: increment iptr by ivdc ("teleport")
-	T: pop a; set ivec < if 0 else set ivec >
-	K: pop a; set ivec ^ if 0 else set ivec v
+	B: negates ivec (bounce)
+	_: increment iptr by ivdc (teleport)
+	T: pop a; set ivec < if 0 else set ivec > (right/left branch)
+	K: pop a; set ivec ^ if 0 else set ivec v (up/down branch)
 	Q: 50% chance of teleport
 
 	# STACK MANIPULATION
 
-	S: pop a, b; push a, b ("swap")
-	P: pop a ("pop")
-	D: peek a; push a ("duplicate")
+	S: pop a, b; push a, b (swap)
+	P: pop a
+	D: peek a; push a (duplicate)
 
 	# EXECUTION CONTROL
 
 	 : nop
-	H: toggle interpreter execution state ("halt")
+	H: toggle EXECUTE flag (halt)
 	n: push the phase of the moon [0-29]
 	l: pop x; sleep for x pico centuries (3156µs, or ~π ms)
 
@@ -95,35 +90,52 @@ STATE_F_DEBUG: if set, debug messages will be printed for significant interprete
 
 	# PROGRAM SPACE MODIFICATION
 
-	m: pop x, y, v; write v to [x,y] ("mutate")
-	g: pop x, y; push value at [x,y] ("get")
+	m: pop x, y, v; write v to [x,y] (mutate)
+	g: pop x, y; push value at [x,y] (get)
 
 	# OTHER STUFF
 
-	E: pop a; execute a ("execute")
+	E: pop a; execute a ("execute") (! Unimplemented !)
 	`: pop y, x; set warp to [x,y]
-	#: store iptr to prtl ("drop portal")
-	@: set iptr to prtl ("use portal")
-	": set/unset pushchar flag
-	?: set/unset debug flag
+	#: store iptr (drop portal)
+	@: set iptr stored value (use portal)
+	": toggle PUSHCHAR flag
+	?: toggle DEBUG flag
+
+**Notes**
 
 x/0, x%0 are math exceptions  
-executing a non-existent instruction is an exception  
+executing a non-existent instruction will throw an error, but will not halt execution  
 arithmetic overflows wrap around and are silent  
 program header is optional  
-program header specifies iptr start, ivec start, dimensions, and warp settings  
 if no program header is found, iptr = [0,0] and ivec = [1,0]  
 dimensions are implicit from maximum line lengths if not specified  
-popping an empty stack is an exception  
+popping an empty stack returns 0 
 \ is a special character, indicating the program header  
 
-**Header format**
+#### Flags
 
-	\f:0/wx:0/wy:0/bx:0/by:0/vx:0/vy:0/px:0/py:0/sx:0/sy:0/
+EXECUTE: if set, the interpreter will continue to execute instructions. If unset, the interpreter will halt.
 
-A file is composed of token:value pairs (separated by colors). Each pair is separated by a forward slash. Tokens are as follows:
+PUSHCHAR: if set, each character encountered by the instruction pointer will be pushed to the stack instead of interpreted as an instruction, unless is it the character '"'.
 
-	f:  flags
+DEBUG: if set, debug messages will be printed for significant interpreter actions and halting execution will show a stack dump.
+
+#### Header
+
+The general format of the header is as follows:
+
+	\<token>:<value>/<token>:<value>/.../
+
+where token is a token as listed below and value is a value in hex. For example:
+
+	\f:0x81/wx:0x03/
+
+sets the flags to the hex value of 0x81 (DEBUG and EXECUTE set), and also sets the warp in the x dimension to 3.
+
+**Tokens:**
+
+	f:  flags (see below for bits)
 	wx: warp x
 	wy: warp y
 	lx: portal x
@@ -135,6 +147,22 @@ A file is composed of token:value pairs (separated by colors). Each pair is sepa
 	sx: pgmsize x
 	sy: pgmsize y
 
-#### Misc
+The flags token allows the internal `flags` register to be set directly. The bits of the flags register are as follows:
 
-Note that source files _must_ end with a newline. Just like any sane *nix thingy. Ignoring this will have nasty consequences, typically involving the last line of source being ignored by the interpreter.
+| Bit | Mask | Name      | Function                                        | Default |
+|-----|:----:|-----------|-------------------------------------------------|---------|
+| 0   | 0x01 | EXECUTE   | While set, program execution continues          | 1       |
+| 1   | 0x02 | PUSHCHAR  | While set, characters are pushed onto the stack | 0       |
+| 2   | 0x04 | unused    | --currently unused--                            | 0       |
+| 3   | 0x08 | unused    | --currently unused--                            | 0       |
+| 4   | 0x10 | unused    | --currently unused--                            | 0       |
+| 5   | 0x20 | EXCEPTION | Set internally when an exception occurs         | 0       |
+| 6   | 0x40 | VERBOSE   | While set, extra messages are printed           | 0       |
+| 7   | 0x80 | DEBUG     | While set, even more extra messages are printed | 0       |
+
+Note that clearing EXECUTE in the header is allowed, it is rather pointless.
+
+#### Miscellaneous
+
+* Source files _must_ end with a newline. Ignoring this will cause the interpreter ignore the last line of source.
+* There are likely issues with wrapping and branching when the instruction vector is not a unit vector (a magnitude greater than 1).
