@@ -1,0 +1,4 @@
+v input.xs2: request input and echo
+<    v'"Enter a number: "
+ ]a[i<v'"Enter a character: "
+^  'sa<
