@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
             printf("\n" ANSI_C_MAGENTA "#### " MISCSTR_PGMSPACE " ####" ANSI_C_RESET "\n");
             for (j=0; j<s.pgmsize[1]; ++j) {
                 for (i=0; i<s.pgmsize[0]; ++i) {
-                    printf("%c",s.pgm[i][j]);
+                    printf("%c",(uint8_t)s.pgm[i][j]); // truncate result
                 }
                 printf("\n");
             }
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
  * Execute the current instruction
  */
 void execute(State* s) {
-    uint8_t x, y, i;
+    int64_t x, y, i;
     int v, w;
     char c[16];
     if (s->flags & STATE_F_PUSHCHAR && CURRENTINSTR(s) != '"') {
@@ -332,16 +332,16 @@ void execute(State* s) {
             while (getchar() != '\n');
             break;
         case '[':
-            printf("%i", POPVAL(s));
+            printf("%" PRId64, POPVAL(s));
             break;
         case ']':
-            printf("%c", POPVAL(s));
+            printf("%c", (uint8_t)POPVAL(s));
             break;
         case '{':
-            printf("%i", PEEKVAL(s));
+            printf("%llu", PEEKVAL(s));
             break;
         case '}':
-            printf("%c", PEEKVAL(s));
+            printf("%c", (uint8_t)PEEKVAL(s));
             break;
         case '\'':
             while ((v = POPVAL(s))) {
@@ -385,15 +385,15 @@ void execute(State* s) {
             message(MSG_DBG_ENABLED,0);
             break;
         case '.': // tri-dimensional instruction, reserved
-            (void)sprintf(c,"%c",CURRENTINSTR(s));
+            (void)sprintf(c,"%c",(uint8_t)CURRENTINSTR(s));
             message(MSG_ERR_INSTRDIM,c);
             break;
         case 'o': // tri-dimensional instruction, reserved
-            (void)sprintf(c,"%c",CURRENTINSTR(s));
+            (void)sprintf(c,"%c",(uint8_t)CURRENTINSTR(s));
             message(MSG_ERR_INSTRDIM,c);
             break;
         default: // unrecognized instructions
-            (void)sprintf(c,"%c (0x%2x)",CURRENTINSTR(s),CURRENTINSTR(s));
+            (void)sprintf(c,"%c (0x%" PRIx64 ")",(uint8_t)CURRENTINSTR(s),CURRENTINSTR(s));
             message(MSG_ERR_BADINSTR,c);
             break;
     }
@@ -436,7 +436,7 @@ void update(State* s) {
         s->stackmax += STACKLEN_INITIAL;
         if (s->flags & STATE_F_DEBUG) {message(MSG_DBG_STACKRESIZE,0);}
         long int diff = s->stack-s->stackbase;
-        s->stackbase = (uint8_t*)realloc(s->stackbase, s->stackmax*sizeof(uint8_t));
+        s->stackbase = (int64_t*)realloc(s->stackbase, s->stackmax*sizeof(int64_t));
         if (!s->stackbase) {
             message(MSG_ERR_STACKALLOC,0);
             s->flags |= STATE_F_EXCEPTION;
@@ -598,14 +598,14 @@ void processHeader(State* s, char* h) {
  * Print the contents of the stack
  */
 void dumpStack(State* s) {
-    uint8_t *p, v;
+    int64_t *p, v;
     printf("stack: %p, stackbase: %p, diff: %ld\n" ANSI_C_RED,s->stack,s->stackbase,s->stack-s->stackbase);
     while (s->stack > s->stackbase) {
         p = s->stack;
         v = POPVAL(s);
-        printf("%p: 0x%02X",p,v);
+        printf("%p: 0x%08llX",p,v);
         if (v >= 32 && v < 127) {
-            printf("  %c",(char)v);
+            printf(" (%c)",(char)v);
         }
         printf("\n");
     }

@@ -110,8 +110,10 @@ arithmetic overflows wrap around and are silent
 program header is optional  
 if no program header is found, iptr = [0,0] and ivec = [1,0]  
 dimensions are implicit from maximum line lengths if not specified  
-popping an empty stack returns 0 
+popping an empty stack returns 0
 \ is a special character, indicating the program header  
+Program space is 64-bit  
+When printing cells of the program space as characters, the least significant byte is displayed. Similarly, when echoing program space in debug mode, values are truncated to the 8 LSBs.
 
 #### Flags
 

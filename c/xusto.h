@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include "i18n/lang-en.h"
 
@@ -53,16 +54,16 @@
 // Types
 typedef struct {
     // Interpreter state struct
-    uint8_t  iptr[2]; // instruction pointer
-    int8_t   ivec[2]; // instruction vector
-    uint8_t  prtl[2]; // portal position
-    int8_t   warp[2]; // program space warp
-    uint8_t  flags; // state flag bitfield
-    uint8_t  pgm[256][256]; // program space
-    uint8_t  pgmsize[2]; // program space dimensions
-    uint8_t* stack; // stack pointer, dynamic array
-    uint8_t* stackbase; // bottom of stack
-    uint16_t stackmax; // allocated length of stack
+    uint8_t   iptr[2]; // instruction pointer
+    int8_t    ivec[2]; // instruction vector
+    uint8_t   prtl[2]; // portal position
+    int8_t    warp[2]; // program space warp
+    uint8_t   flags; // state flag bitfield
+    int64_t  pgm[256][256]; // program space
+    uint8_t   pgmsize[2]; // program space dimensions
+    int64_t* stack; // stack pointer, dynamic array
+    int64_t* stackbase; // bottom of stack
+    uint16_t  stackmax; // allocated length of stack
 } State;
 
 typedef struct {

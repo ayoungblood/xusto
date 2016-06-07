@@ -1,0 +1,18 @@
+v integer.xs2: Full suite of integer tests
+  Check for proper behaviour of signed 64bit integer type
+
+> " :elpmiS"' 0[ 48*] 1[ 48*] 1D+[ 48*] 41-[ 48*] 22*[ 48*] a2/[ 48*] e8%[ v
+v                                                                          <
+> 48*] 124++[ 48*] 222**[ 48*] 12+3*[ a]                                 v
+v                                                                        <
+> " :dengiS"' 00-[ 48*] 01-[ 48*] 88*b6*-[ 48*] 0a-7+[ 48*] 02-2*[ 48*]  v
+v                                                                        <
+> 0a-2/[ 48*] 3f+03-/[ 48*] 04-05-*1+03-/[ 48*] 8a*8+0b-/[ 48*] 09-0S-0S-[ a] v
+v                                                                             <
+> " :+egraL"' fff**fff**-[ 48*] 884**55a**5+-[ 48*] f3a*4+*2+f1+D*/[ 48*]  v
+v                                                                          <
+> ffff***5555***/9/3/[ 48*] 55*a*6+D*D*5aa**c+/88*88**9a*6+-aaa**/[ 48*]   v
+v                                                                          <
+> " :-egraL"' a] v
+v                <
+> " :1-36^2"' f1+8*D*D*D*ca*8+*1-[ a] H
