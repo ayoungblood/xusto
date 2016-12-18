@@ -7,7 +7,6 @@ LDLIBS=
 
 SRCS=src/xusto.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
-#TARGET=xusto
 
 all: xusto
 
@@ -19,6 +18,11 @@ xusto.o: src/xusto.cpp
 clean:
 	-$(RM) src/*.o
 	-$(RM) -r *.dSYM
+	-$(RM) src/*.gch
+	-$(RM) src/*/*.gch
 
 dist-clean: clean
 	-$(RM) xusto
+
+test: xusto
+	-./xusto
