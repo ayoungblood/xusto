@@ -31,14 +31,15 @@ int main(int argc, char *argv[]) {
     message(MSG_ERR_NOARGS, 0);
     return RETURN_BAD_ARGS;
   }
+  // for each argument (which should be files), open, load, and execute
   for (; optind < argc; ++optind) {
     printf("arg[%d]: %s\n", optind, argv[optind]);
   }
 }
 
 void message(const char *msg, int code, char *extra) {
-  char *type;
-  char *color;
+  const char *type;
+  const char *color;
   switch (code >> 8) {
   case 0: // SHOULD NOT HAPPEN
     color = ANSI_C_MAGENTA;
@@ -64,7 +65,7 @@ void message(const char *msg, int code, char *extra) {
     printf(ANSI_C_MAGENTA STR_BADERROR "\n" ANSI_C_RESET);
     return;
   }
-  char *ex = extra;
+  const char *ex = extra;
   if (!extra)
     ex = "";
   if (flags & STATE_F_DEBUG) {
@@ -73,6 +74,4 @@ void message(const char *msg, int code, char *extra) {
     printf("%s%s%s\n" ANSI_C_RESET, color, msg, ex);
   }
   return;
-
-  // printf("%s\n", msg);
 }

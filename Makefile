@@ -25,4 +25,4 @@ dist-clean: clean
 	-$(RM) xusto
 
 test: xusto
-	-./xusto
+	-./xusto -dv test.xs3

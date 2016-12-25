@@ -12,7 +12,7 @@
 #define MSG_ERR_NOARGS "Expected at least one argument.", 0x100
 
 // WARNING MESSAGES 0x200
-#define MSG_WRN_BADOPTION "Unknown option: ", 0x500
+#define MSG_WRN_BADOPTION "Unknown option: ", 0x200
 
 // DEBUG MESSAGES 0x300
 
