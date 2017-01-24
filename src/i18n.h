@@ -13,4 +13,12 @@
 #include "i18n/lang-en.h"
 #endif
 
+#ifdef LANG_ES
+#include "i18n/lang-es.h"
+#endif
+
+#ifdef LANG_FURBISH
+#include "i18n/lang-xx-furbish.h"
+#endif
+
 #endif /* I18N_H */

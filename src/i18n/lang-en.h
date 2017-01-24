@@ -1,6 +1,6 @@
 /*****************************************************************************\
  * lang-en.h                                                                 *
- * English language strings                                                  *
+ * English language strings and messages                                     *
 \*****************************************************************************/
 #ifndef LANG_EN_H
 #define LANG_EN_H
