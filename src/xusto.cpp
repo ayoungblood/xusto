@@ -34,7 +34,52 @@ int main(int argc, char *argv[]) {
   // for each argument (which should be files), open, load, and execute
   for (; optind < argc; ++optind) {
     printf("arg[%d]: %s\n", optind, argv[optind]);
+    parse(argv[optind]);
   }
+}
+
+void parse(const char *filename) {
+  FILE *fileptr;
+  char *buffer;
+  long filelen;
+
+  fileptr = fopen(filename, "rb"); // Open the file in binary mode
+  fseek(fileptr, 0, SEEK_END);     // Jump to the end of the file
+  filelen = ftell(fileptr);        // Get the current byte offset in the file
+  rewind(fileptr);                 // Jump back to the beginning of the file
+  unsigned char b, b1, b2, b3;     // bytes from the file
+  unsigned long v;                 // assembled value
+  for (int i = 0; i < filelen; ++i) {
+    fread(&b, 1, 1, fileptr);
+    // stone-age UTF-8 parsing
+    if (~b >> 7 & 1) { // 7-bit code point (first byte 0b0xxxxxxx)
+      v = b;
+    } else { // 11, 16, or 21-bit code point or continuation byte
+      // printf(">>0x%0X\r\n", b);
+
+      if ((b & 0xe0) == 0xc0) { // 11-bit code point (first byte 0b110xxxxx,
+                                // 1 byte follows)
+        // printf("==0x%0X\r\n", b & 0xe0);
+        fread(&b1, 1, 1, fileptr);
+        v = (b & 0x1f) << 6 | (b1 & 0x3f);
+      } else if (b >> 4 & 0x0f == 0x0e) { // 16-bit code point (first byte
+        // 0b1110xxxx, 2 bytes follow)
+        v = 0x0;
+      } else if (b >> 3 & 0x1f == 0x1e) { // 21-bit code point (first byte
+        // 0b11110xxx, 3 bytes follow)
+        v = 0x0;
+      } else { // we are desynchronized
+        0xffffffff;
+      }
+    }
+    printf("0x%0X\r\n", v);
+  }
+
+  // buffer = (char *)malloc((filelen + 1) *
+  //                      sizeof(char)); // Enough memory for file + \0
+  // fread(buffer, filelen, 1, fileptr);    // Read in the entire file
+
+  fclose(fileptr); // Close the file
 }
 
 void message(const char *msg, int code, char *extra) {

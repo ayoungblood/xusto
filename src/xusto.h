@@ -22,6 +22,7 @@
 
 #define eprintf(...) fprintf(stderr, __VA_ARGS__)
 
+void parse(const char *filename);
 void message(const char *msg, int code, char *extra);
 
 // ASCII Colors
