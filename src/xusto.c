@@ -5,11 +5,11 @@
 
 #include "xusto.h"
 
-flag_t flags = 0;
+extern flags_t flags;
 
 int main(int argc, char **argv) {
     (void)argv;
-    printf("argc: %d\n", argc);
+    eprintf("argc: %d\n", argc);
 
     /* Parse command line options/arguments */
     /*
@@ -97,6 +97,7 @@ void parse(const char *filename) {
     fclose(fileptr); // Close the file
 }
 */
+/*
 void message(const char *msg, int code, char *extra) {
     const char *type;
     const char *color;
@@ -135,3 +136,4 @@ void message(const char *msg, int code, char *extra) {
     }
     return;
 }
+*/

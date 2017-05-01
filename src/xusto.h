@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <stdint.h>
 
+#include "util.h"
+
 #define LANG_EN
 #include "i18n.h"
 
@@ -21,21 +23,8 @@
 #define STATE_F_VERBOSE 0x40
 #define STATE_F_DEBUG 0x80
 
-#define eprintf(...) fprintf(stderr, __VA_ARGS__)
-
-void parse(const char *filename);
-void message(const char *msg, int code, char *extra);
-
-// ASCII Colors
-#define ANSI_C_BLACK "\x1b[1;30m"
-#define ANSI_C_RED "\x1b[1;31m"
-#define ANSI_C_YELLOW "\x1b[1;33m"
-#define ANSI_C_GREEN "\x1b[1;32m"
-#define ANSI_C_CYAN "\x1b[1;36m"
-#define ANSI_C_BLUE "\x1b[1;34m"
-#define ANSI_C_MAGENTA "\x1b[1;35m"
-#define ANSI_C_WHITE "\x1b[1;37m"
-#define ANSI_C_RESET "\x1b[0m"
+//void parse(const char *filename);
+//void message(const char *msg, int code, char *extra);
 
 // Message types
 #define MSG_TYP_CATASTROPHIC "CATASTROPHIC"
@@ -43,5 +32,3 @@ void message(const char *msg, int code, char *extra);
 #define MSG_TYP_WARNING "Warning"
 #define MSG_TYP_INFO "Info"
 #define MSG_TYP_DEBUG "debug"
-
-typedef uint32_t flag_t;
