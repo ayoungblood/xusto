@@ -2,7 +2,7 @@
 #    except:
 os:
     - linux
-#    - osx
+    - osx
 dist: trusty
 sudo: false
 language: c
@@ -21,3 +21,4 @@ script:
 #  on:
 #    tags: true
 notifications:
+    email: false
