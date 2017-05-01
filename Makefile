@@ -57,18 +57,18 @@ OBJS=$(subst .cpp,.o,$(SRCS))
 all: xusto
 
 xusto: $(OBJS)
-	$(CC) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
+		$(CC) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
 
 xusto.o: src/xusto.cpp
 
 clean:
-	-$(RM) src/*.o
-	-$(RM) -r *.dSYM
-	-$(RM) src/*.gch
-	-$(RM) src/*/*.gch
+		-$(RM) src/*.o
+		-$(RM) -r *.dSYM
+		-$(RM) src/*.gch
+		-$(RM) src/*/*.gch
 
 dist-clean: clean
-	-$(RM) $(TARGET)
+		-$(RM) $(TARGET)
 
 test: xusto
-	-./xusto -dv test.xs3
+		-./xusto -dv test.xs3

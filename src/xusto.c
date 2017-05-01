@@ -8,6 +8,9 @@
 flag_t flags = 0;
 
 int main(int argc, char **argv) {
+    (void)argv;
+    printf("argc: %d\n", argc);
+
     /* Parse command line options/arguments */
     /*
         -d, --debug
@@ -47,6 +50,7 @@ int main(int argc, char **argv) {
         //parse(argv[optind]);
     }
     */
+    return RETURN_OK;
 }
 /*
 void parse(const char *filename) {
