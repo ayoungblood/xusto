@@ -1,6 +1,6 @@
 /*****************************************************************************\
- * xusto.cpp                                                                 *
- * Xusto interpreter, now with 100% more plus plus                           *
+ * xusto.c                                                                   *
+ * Xusto interpreter, now with 0% more plus plus                             *
 \*****************************************************************************/
 
 #include "xusto.h"
@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
     */
 
     // Validate command line arguments --------------------
+    /*
     int opt;
     opterr = 0;                                      // silence getopt complaints
     while ((opt = getopt(argc, argv, "dv")) != -1) { // iterate through options
@@ -45,6 +46,7 @@ int main(int argc, char **argv) {
         printf("arg[%d]: %s\n", optind, argv[optind]);
         //parse(argv[optind]);
     }
+    */
 }
 /*
 void parse(const char *filename) {

@@ -1,14 +1,13 @@
 # Makefile
 TARGET = xusto
 CC = gcc
-CXX = g++
 RM = rm -f
-# C++ compiler flags
+# C compiler flags
 # (see https://stackoverflow.com/questions/3375697/useful-gcc-flags-for-c)
-CXXFLAGS=-g -std=c++11 -Wall -Wextra -Wshadow -Wpointer-arith \
+CFLAGS=-g -std=c11 -Wall -Wextra -Wshadow -Wpointer-arith \
 -Wstrict-prototypes -Wmissing-prototypes -Wswitch-default -Wunused-macros
 # -g: debugging symbols
-# -std=c++11: ISO/IEC 14882:2011 (C++11)
+# -std=c11: ISO/IEC9899:2011 (C11)
 # -Wall -Wextra -pedantic: stricter warnings
 # -Wshadow: warn if a local shadows something else
 # -Wpointer-arith: warn on silly pointer operations
@@ -58,7 +57,7 @@ OBJS=$(subst .cpp,.o,$(SRCS))
 all: xusto
 
 xusto: $(OBJS)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
 
 xusto.o: src/xusto.cpp
 

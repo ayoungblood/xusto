@@ -3,9 +3,9 @@
  * Header file and general defines for the Xusto interpreter                 *
 \*****************************************************************************/
 
-#include <cstdio>
+#include <stdio.h>
 #include <unistd.h>
-#include <cstdint>
+#include <stdint.h>
 
 #define LANG_EN
 #include "i18n.h"
