@@ -59,14 +59,14 @@ U+0039 - 9, push 0x09
 U+003a - :,
 U+003b - ;,
 U+003c - <, set ivec to [-1,0,0]
-U+003d - =, pop a, b; push a==b
+U+003d - =, equality: pop a, b; push a==b
 U+003e - >, set ivec to [1,0,0]
 U+003f - ?,
 U+0040 - @, restore iptr (use portal)
 U+0041 - A,
 U+0042 - B, bounce: set ivec to [-x,-y,-z]
 U+0043 - C,
-U+0044 - D,
+U+0044 - D, duplicate: peek a; push a
 U+0045 - E, pop a,b; push a * 10^b
 U+0046 - F,
 U+0047 - G, giga: pop a, push a * 10^12
@@ -95,12 +95,12 @@ U+005d - ], pop c, print c as ASCII character
 U+005e - ^, set ivec to [0,1,0]
 U+005f - _, trampoline: increment iptr by ivec
 U+0060 - `, (formerly warp)
-U+0061 - a,
-U+0062 - b,
-U+0063 - c,
-U+0064 - d, duplicate: peek a; push a
-U+0065 - e, push e (2.71828)
-U+0066 - f,
+U+0061 - a, push 0x0a
+U+0062 - b, push 0x0b
+U+0063 - c, push 0x0c
+U+0064 - d, push 0x0d
+U+0065 - e, push 0x0e
+U+0066 - f, push 0x0f
 U+0067 - g, greater: pop a,b; push a > b
 U+0068 - h, halt: orderly halt
 U+0069 - i,
@@ -223,3 +223,6 @@ U+00fc - ü
 U+00fd - ý
 U+00fe - þ
 U+00ff - ÿ
+
+UNASSIGNED:
+push e (2.71828)
