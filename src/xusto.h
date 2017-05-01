@@ -5,6 +5,7 @@
 
 #include <cstdio>
 #include <unistd.h>
+#include <cstdint>
 
 #define LANG_EN
 #include "i18n.h"
@@ -42,3 +43,5 @@ void message(const char *msg, int code, char *extra);
 #define MSG_TYP_WARNING "Warning"
 #define MSG_TYP_INFO "Info"
 #define MSG_TYP_DEBUG "debug"
+
+typedef uint32_t flag_t;
