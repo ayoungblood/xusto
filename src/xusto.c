@@ -8,49 +8,128 @@
 extern flags_t flags;
 
 int main(int argc, char **argv) {
-    (void)argv;
-    eprintf("argc: %d\n", argc);
+    /* List of source files that will be set by the arguments wrapper */
+    fp_list_t source_fp_list;
+    source_fp_list.length = 0;
+    /* Parse arguments and options, initializing the file list */
+    int rv = arguments(argc, argv, &flags, &source_fp_list);
+    if (rv != 0)
+        return (rv == -1)?RETURN_OK:rv;
+    int i;
+    /* Loop through source file list and execute it */
+    char buf[180];
+    for (i = 0; i < source_fp_list.length; ++i) {
+        printf("Parsing %s\n", source_fp_list.filenames[i]);
+        while (fgets(buf, sizeof(buf), source_fp_list.files[i]) != NULL ) {
 
-    /* Parse command line options/arguments */
-    /*
-        -d, --debug
-        -v, --verbose
-        -c, --color
-        -h, --help
-        -V, --version
-    */
-
-    // Validate command line arguments --------------------
-    /*
-    int opt;
-    opterr = 0;                                      // silence getopt complaints
-    while ((opt = getopt(argc, argv, "dv")) != -1) { // iterate through options
-        switch (opt) {
-            case 'd': // -d: debug
-            flags |= STATE_F_DEBUG;
-            break;
-            case 'v': // -v: verbose
-            flags |= STATE_F_VERBOSE;
-            break;
-            case '?': // unknown option...
-            // eprintf(MSG_NO_OPTION "%c\n", char(optopt));
-            char option[] = {char(optopt), 0};
-            message(MSG_WRN_BADOPTION, option);
-            break;
+            // Read the instruction into memory
+            printf("%s", buf);
+        }
+        if (source_fp_list.files[i]) {
+            printf("Closing %s\n", source_fp_list.filenames[i]);
+            fclose(source_fp_list.files[i]);
+        } else {
+            printf("Possible badness with %s, continuing...\n", source_fp_list.filenames[i]);
         }
     }
-    // done parsing options, check for remaining arguments
-    if ((argc <= 1) || (argv[argc - 1] == NULL) || (optind == argc)) {
-        message(MSG_ERR_NOARGS, 0);
-        return RETURN_BAD_ARGS;
-    }
-    // for each argument (which should be files), open, load, and execute
-    for (; optind < argc; ++optind) {
-        printf("arg[%d]: %s\n", optind, argv[optind]);
-        //parse(argv[optind]);
-    }
-    */
+    fp_list_cleanup(&source_fp_list);
     return RETURN_OK;
+}
+
+int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
+    /* Clear flags */
+    *f = 0x0;
+    /* Automatically configure colorized output based on CLICOLOR and TERM
+       environment variables (CLICOLOR=1 or TERM=xterm-256color) */
+    char* crv;
+    if ((crv = getenv("CLICOLOR"))) { // CLICOLOR is set
+        if (!strcmp(crv,"1")) {
+            *f |= MASK_COLOR;
+        } else {
+            *f &= ~MASK_COLOR;
+        }
+    } else { // CLICOLOR not defined, check TERM
+        if ((crv = getenv("TERM"))) { // TERM is set
+            if (!strcmp(crv,"xterm-256color")) {
+                *f |= MASK_COLOR;
+            } else {
+                *f &= ~MASK_COLOR;
+            }
+        } else { // CLICOLOR and TERM not defined, give up
+            *f &= ~MASK_COLOR;
+        }
+    }
+    /* Parse command line options with getopt */
+    int i, c, option_index = 0;
+    //opterr = 0; // disable getopt_long default errors
+    while (1) {
+        static struct option long_options[] = {
+            /* Simulator options */
+            {"color",           required_argument,  0, 'c'}, // (disabled,auto,force)
+            {"debug",           no_argument,        0, 'd'}, // level
+            {"help",            no_argument,        0, 'h'},
+            {"version",         no_argument,        0, 'V'},
+            {"verbose",         no_argument,        0, 'v'},
+            {0, 0, 0, 0}
+        };
+        c = getopt_long (argc, argv, "c:dhVv",long_options, &option_index);
+        if (c == -1) break; // Detect the end of the options.
+
+        switch (c) {
+            /* Simulator options */
+            case 'c': // --color
+                if (!strcmp(optarg,"disabled") || !strcmp(optarg,"d")) {
+                    *f &= ~MASK_COLOR;
+                } else if (!strcmp(optarg,"force") || !strcmp(optarg,"f")) {
+                    *f |= MASK_COLOR;
+                } else if (!strcmp(optarg,"auto") || !strcmp(optarg,"a")) {
+                    // do nothing, already set above
+                } else {
+                    printf("Invalid color setting: %s\n", optarg);
+                }
+                break;
+            case 'd': // --debug
+                *f |= MASK_DEBUG;
+                break;
+            case 'h': // --help
+                printf("halp\n");
+                return -1; // caller should exit without errors
+            case 'V': // --version
+                printf("%s - Interpreter for the Xusto language (v. %s)\n",
+                    TARGET_STRING,VERSION_STRING);
+                return -1; // caller should exit ok
+            case 'v': // --verbose
+                *f |= MASK_VERBOSE;
+                break;
+            case '?': // error
+                /* getopt_long already printed an error message. */
+                break;
+            default: // bad error
+                printf("Failed to parse command line argument. Exiting.\n");
+                return RETURN_BAD_OPTS;
+        }
+    }
+
+    /* Iterate through any remaining command line arguments (not options). */
+    if (optind < argc) {
+        printf("Have %d files to read\n", argc-optind);
+        fp_list->length = argc-optind;
+        fp_list->files = (FILE**)malloc(sizeof(FILE*)*(size_t)(fp_list->length));
+        fp_list->filenames = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
+        for (i = 0; i < fp_list->length; ++i) {
+            fp_list->files[i] = fopen(argv[optind + i],"r");
+            fp_list->filenames[i] = argv[optind + i];
+            if (!fp_list->files[i]) {
+                cprintf(ANSI_C_RED,"You lied to me when you told me this was a file: %s\n",
+                    fp_list->filenames[i]);
+                return RETURN_BAD_ARGS; // exit with error
+            }
+        }
+    } else {
+        cprintf(ANSI_C_RED,"Cannot interpret nothing! Exiting.\n");
+        return RETURN_BAD_ARGS; // exit with error
+    }
+    return RETURN_OK; // everything is OK
 }
 /*
 void parse(const char *filename) {

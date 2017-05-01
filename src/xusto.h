@@ -6,15 +6,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <getopt.h>
 
 #include "util.h"
 
 #define LANG_EN
 #include "i18n.h"
-
-// Return codes
-#define RETURN_OK 0x00
-#define RETURN_BAD_ARGS 0x01
 
 // Interpreter state flag bits
 #define STATE_F_EXECUTE 0x01
@@ -25,6 +22,12 @@
 
 //void parse(const char *filename);
 //void message(const char *msg, int code, char *extra);
+
+// Parse options and arguments
+// Returns -1 when the caller should return without errors,
+// returns >1 when the caller should return with errors,
+// returns 0 on no error
+int arguments(int argc, char **argv, flags_t *flags, fp_list_t *fp_list);
 
 // Message types
 #define MSG_TYP_CATASTROPHIC "CATASTROPHIC"

@@ -9,4 +9,10 @@
 
 typedef uint32_t flags_t;
 
+typedef struct fp_list_t {
+    int length;
+    FILE **files;
+    char **filenames;
+} fp_list_t;
+
 #endif /* _TYPES_H */

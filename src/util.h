@@ -13,12 +13,14 @@
 #include "types.h"
 
 // Debugging and internal status flags
-#define MASK_DEBUG          (1<<0) // Show debugging messages
-#define MASK_VERBOSE        (1<<1) // Show verbose messages
-#define MASK_SANITY         (1<<2) // Do extra checking (bounds checking, etc)
-#define MASK_INTERACTIVE    (1<<3) // Interactive stepping
-#define MASK_ALTFORMAT      (1<<4) // Alternate assembly input format
-#define MASK_COLOR          (1<<5) // Colorized text output
+#define MASK_DEBUG          ((flags_t)1<<0) // Show debugging messages
+#define MASK_VERBOSE        ((flags_t)1<<1) // Show verbose messages
+#define MASK_COLOR          ((flags_t)1<<2) // Colorized text output
+
+// Return codes (for main)
+#define RETURN_OK           0x00
+#define RETURN_BAD_ARGS     0x01
+#define RETURN_BAD_OPTS     0x02
 
 // ANSI escapes
 #define ANSI_C_BLACK        "\x1b[1;30m"
@@ -50,5 +52,7 @@
 void cprintf(const char *color, const char *format, ...);
 
 flags_t flags;
+
+void fp_list_cleanup(fp_list_t *fp_list);
 
 #endif /* _UTIL_H */
