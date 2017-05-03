@@ -85,6 +85,7 @@ Eventually, Executors can be threaded, so that an instruction causes an Executor
 [J](https://en.wikipedia.org/wiki/J_(programming_language))  
 [APL](https://en.wikipedia.org/wiki/APL_(programming_language)), see also [APL syntax and symbols](https://en.wikipedia.org/wiki/APL_syntax_and_symbols)  
 [GolfScript](https://esolangs.org/wiki/GolfScript)  
+[CJAM](https://sourceforge.net/p/cjam/wiki/Home/), see also [CJAM syntax cheat sheet](https://dl.dropboxusercontent.com/u/15495351/cjam.pdf)  
 [Z80 Assembly](http://sgate.emt.bme.hu/patai/publications/z80guide/), see also [Z80 Instructions](http://sgate.emt.bme.hu/patai/publications/z80guide/app1.html)  
 [6502 Assembly](https://en.wikibooks.org/wiki/6502_Assembly), see also [Easy 6502](https://skilldrick.github.io/easy6502/) and [6502.org](http://www.6502.org/)  
 [AVR Instruction Set](http://www.atmel.com/images/Atmel-0856-AVR-Instruction-Set-Manual.pdf)  
@@ -94,6 +95,14 @@ Eventually, Executors can be threaded, so that an instruction causes an Executor
 [PicoBlaze Instruction Set](https://www.xilinx.com/support/documentation/ip_documentation/ug129.pdf)  
 [FALSE](https://esolangs.org/wiki/FALSE)  
 [Esolangs: Two-dimensional languages](https://esolangs.org/wiki/Category:Two-dimensional_languages)  
+
+**Turing-Completeness**
+
+[Brainfuck](https://esolangs.org/wiki/Brainfuck) - Tape and 8 instructions  
+[1L](https://esolangs.org/wiki/1L) - Two-dimensional with 2 instructions  
+[Minimal-2D](https://esolangs.org/wiki/Minimal-2D) - Two-dimensional with 11 instructions  
+[Swordfish](https://esolangs.org/wiki/Swordfish) - Two-dimensional, a reduced version of ><>  
+[Nopfunge](https://esolangs.org/wiki/Nopfunge) - Two-dimensional, degenerate reduction of Befunge
 
 **Neat but not really related/relevant esoteric languages**
 
