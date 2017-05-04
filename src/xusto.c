@@ -8,6 +8,7 @@
 extern flags_t flags;
 
 int main(int argc, char **argv) {
+    int i;
     /* List of source files that will be set by the arguments wrapper */
     fp_list_t source_fp_list;
     source_fp_list.length = 0;
@@ -15,21 +16,17 @@ int main(int argc, char **argv) {
     int rv = arguments(argc, argv, &flags, &source_fp_list);
     if (rv != 0)
         return (rv == -1)?RETURN_OK:rv;
-    int i;
-    /* Loop through source file list and execute it */
-    char buf[180];
+    /* Loop through source file list and execute files */
     for (i = 0; i < source_fp_list.length; ++i) {
         printf("Parsing %s\n", source_fp_list.filenames[i]);
-        while (fgets(buf, sizeof(buf), source_fp_list.files[i]) != NULL ) {
 
-            // Read the instruction into memory
-            printf("%s", buf);
-        }
+        // Close the file. If the fp is NULL, something bad happened
         if (source_fp_list.files[i]) {
             printf("Closing %s\n", source_fp_list.filenames[i]);
             fclose(source_fp_list.files[i]);
         } else {
-            printf("Possible badness with %s, continuing...\n", source_fp_list.filenames[i]);
+            printf("Possible badness with %s, continuing...\n",
+                source_fp_list.filenames[i]);
         }
     }
     fp_list_cleanup(&source_fp_list);
@@ -92,7 +89,10 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                 *f |= MASK_DEBUG;
                 break;
             case 'h': // --help
-                printf("halp\n");
+                printf( "Usage: %s [option]... [file ...]\n" \
+                        "Run %s on on source file(s). If no file is provided, \n" \
+                        "read from " ANSI_BOLD "stdin" ANSI_RESET ".\n",
+                        TARGET_STRING, TARGET_STRING);
                 return -1; // caller should exit without errors
             case 'V': // --version
                 printf("%s - Interpreter for the Xusto language (v. %s)\n",
@@ -105,17 +105,18 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                 /* getopt_long already printed an error message. */
                 break;
             default: // bad error
-                printf("Failed to parse command line argument. Exiting.\n");
+                eprintf("Failed to parse command line argument. Exiting.\n");
                 return RETURN_BAD_OPTS;
         }
     }
 
     /* Iterate through any remaining command line arguments (not options). */
     if (optind < argc) {
-        printf("Have %d files to read\n", argc-optind);
+        // Get the number of (potential) files we have and allocate
         fp_list->length = argc-optind;
         fp_list->files = (FILE**)malloc(sizeof(FILE*)*(size_t)(fp_list->length));
         fp_list->filenames = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
+        // For each file, try to open it
         for (i = 0; i < fp_list->length; ++i) {
             fp_list->files[i] = fopen(argv[optind + i],"r");
             fp_list->filenames[i] = argv[optind + i];
@@ -126,9 +127,14 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
             }
         }
     } else {
-        cprintf(ANSI_C_RED,"Cannot interpret nothing! Exiting.\n");
-        return RETURN_BAD_ARGS; // exit with error
+        // We are reading from stdin
+        fp_list->length = 1;
+        fp_list->files = (FILE**)malloc(sizeof(FILE*)*(size_t)(fp_list->length));
+        fp_list->filenames = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
+        fp_list->files[0] = stdin;
+        fp_list->filenames[0] = strdup("stdin");
     }
+    // If we reach here, we have succesfully opened all the files
     return RETURN_OK; // everything is OK
 }
 /*
