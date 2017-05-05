@@ -13,6 +13,8 @@
 #define LANG_EN
 #include "i18n.h"
 
+#define PARSE_BUFFER_SIZE 4
+
 // Interpreter state flag bits
 #define STATE_F_EXECUTE 0x01
 #define STATE_F_PUSHCHAR 0x02
@@ -26,8 +28,13 @@
 // Parse options and arguments
 // Returns -1 when the caller should return without errors,
 // returns >1 when the caller should return with errors,
-// returns 0 on no error
+// returns 0 otherwise
 int arguments(int argc, char **argv, flags_t *flags, fp_list_t *fp_list);
+
+// Parse source file
+// Returns >1 when the caller should return with errors,
+// return 0 otherwise
+int parse(FILE *fp, char *filename);
 
 // Message types
 #define MSG_TYP_CATASTROPHIC "CATASTROPHIC"
