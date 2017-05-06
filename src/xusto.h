@@ -7,13 +7,12 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <getopt.h>
+#include <string.h>
 
 #include "util.h"
 
 #define LANG_EN
 #include "i18n.h"
-
-#define PARSE_BUFFER_SIZE 4
 
 // Interpreter state flag bits
 #define STATE_F_EXECUTE 0x01

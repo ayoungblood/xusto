@@ -35,9 +35,10 @@ int main(int argc, char **argv) {
 
 int parse(FILE *fp, char *filename) {
     long file_length = 0;
-    char buffer[PARSE_BUFFER_SIZE + 1];
-    size_t bytes_read = 0;
-    buffer[PARSE_BUFFER_SIZE] = '\0';
+    size_t bytes_read = 0, rv = 0;
+    unsigned char b = 0, b1 = 0, b2 = 0, b3 = 0; // bytes from the file
+    uint32_t v; // assembled value
+    /* Sanity check the file pointer */
     if (fp == NULL) eprintf("Error parsing %s\n", filename);
     /* Get the length of the file (in bytes) */
     fseek(fp, 0, SEEK_END);
@@ -45,25 +46,25 @@ int parse(FILE *fp, char *filename) {
     rewind(fp);
     eprintf("%s is %ld bytes long\n", filename, file_length);
     /* Iterate through the file, byte-by-byte */
-    unsigned char b = 0, b1 = 0, b2 = 0, b3 = 0;     // bytes from the file
-    uint32_t v;                 // assembled value
     while (bytes_read < (unsigned long)file_length) {
-        bytes_read += fread(&b, 1, 1, fp);
-        printf("first byte: %02x (0%04o)\n", b, b);
+        // Check that we can actually read bytes, so if we are reading from
+        // stdin, we will exit the loop when we can't read any more bytes
+        // This is not needed on the wider codepoints, because if an incomplete
+        // codepoint is encountered, we will at most read three bad bytes
+        rv = fread(&b, 1, 1, fp);
+        if (rv != 1) break;
+        bytes_read += rv;
         /* Stone-age UTF-8 parsing: check the first byte and read more as necessary */
-        // If the first bit is clear, it's a single byte
-        if (~b & 0x80) {
-            printf("1-byte code point: %02x\n", b);
+        if (~b & 0x80) { // If the first bit is clear, single byte codepoint
             // 7-bit code point (1 byte, U+0000 - U+007F)
             // Byte 0: 0b0xxxxxxx
-            v = b;
-        } else { // Otherwise, it's a multi-byte code point
+            v = b & 0177;
+        } else { // Otherwise, it's a multi-byte codepoint
             if ((b & 0340) == 0300) {
                 // 11-bit code point (2 byte, U+0080 - U+07FF)
                 // Byte 0: 0b110xxxxx
                 // Byte 1: 0b10xxxxxx
                 bytes_read += fread(&b1, 1, 1, fp);
-                printf("2-byte code point: %02x, %02x\n", b, b1);
                 v = ((uint32_t)b1 & 0077) | ((uint32_t)b & 0037)<<6;
             } else if ((b & 0360) == 0340) {
                 // 16-bit code point (3 byte, U+0800 - U+FFFF)
@@ -72,7 +73,6 @@ int parse(FILE *fp, char *filename) {
                 // Byte 2: 0b10xxxxxx
                 bytes_read += fread(&b1, 1, 1, fp);
                 bytes_read += fread(&b2, 1, 1, fp);
-                printf("3-byte code point: %02x, %02x, %02x\n", b, b1, b2);
                 v = ((uint32_t)b2 & 0077) | ((uint32_t)b1 & 0077)<<6 | ((uint32_t)b & 0017)<<12;
             } else if ((b & 0370) == 0360) {
                 // 21-bit code point (4 byte, U+10000 - U+10FFFF)
@@ -83,11 +83,15 @@ int parse(FILE *fp, char *filename) {
                 bytes_read += fread(&b1, 1, 1, fp);
                 bytes_read += fread(&b2, 1, 1, fp);
                 bytes_read += fread(&b3, 1, 1, fp);
-                printf("4-byte code point: %02x, %02x, %02x, %02x\n", b, b1, b2, b3);
                 v = ((uint32_t)b3 & 0077) | ((uint32_t)b2 & 0077)<<6 | ((uint32_t)b1 & 0077)<<12 | ((uint32_t)b & 0007)<<18;
             } else {
-                // We are desynchronized or the file is corrupted
-                printf("Desynchronized at %zu bytes\n", bytes_read);
+                // An invalid UTF-8 byte.
+                // Either we are horribly desynchronized or the file is corrupted
+                // We intentionally expose a UTF-8 parser vulnerability and
+                // take the byte verbatim, but also print a warning
+                cprintf(ANSI_C_YELLOW, "Warning: Possible corruption in %s@b%zu: 0x%02x\n",
+                    filename, bytes_read, b);
+                v = b;
             }
         }
         printf("v: 0x%06x\n", v);
