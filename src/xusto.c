@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 int parse(FILE *fp, char *filename) {
     long file_length = 0;
     char buffer[PARSE_BUFFER_SIZE + 1];
-    // size_t bytes_read = 0;
+    size_t bytes_read = 0;
     buffer[PARSE_BUFFER_SIZE] = '\0';
     if (fp == NULL) eprintf("Error parsing %s\n", filename);
     /* Get the length of the file (in bytes) */
@@ -45,35 +45,52 @@ int parse(FILE *fp, char *filename) {
     rewind(fp);
     eprintf("%s is %ld bytes long\n", filename, file_length);
     /* Iterate through the file, byte-by-byte */
-    unsigned char b, b1, b2, b3;     // bytes from the file
-    unsigned long v;                 // assembled value
-    for (int i = 0; i < file_length; ++i) {
-        fread(&b, 1, 1, fp);
-        // stone-age UTF-8 parsing
-        if (~b >> 7 & 1) { // 7-bit code point (first byte 0b0xxxxxxx)
+    unsigned char b = 0, b1 = 0, b2 = 0, b3 = 0;     // bytes from the file
+    uint32_t v;                 // assembled value
+    while (bytes_read < (unsigned long)file_length) {
+        bytes_read += fread(&b, 1, 1, fp);
+        printf("first byte: %02x (0%04o)\n", b, b);
+        /* Stone-age UTF-8 parsing: check the first byte and read more as necessary */
+        // If the first bit is clear, it's a single byte
+        if (~b & 0x80) {
+            printf("1-byte code point: %02x\n", b);
+            // 7-bit code point (1 byte, U+0000 - U+007F)
+            // Byte 0: 0b0xxxxxxx
             v = b;
-        } else { // 11, 16, or 21-bit code point
-            if ((b & 0xe0) == 0xc0) { // 11-bit code point (first byte 0b110xxxxx,
-                // 1 byte follows)
-                // printf("==0x%0X\r\n", b & 0xe0);
-                fread(&b1, 1, 1, fp);
-                v = (unsigned long)(b & 0x1f) << 6 | (unsigned long)(b1 & 0x3f);
-            } else if ((b >> 4 & 0x0f) == 0x0e) { // 16-bit code point (first byte
-                // 0b1110xxxx, 2 bytes follow)
-                v = 0x0;
-                fread(&b1, 1, 1, fp);
-                fread(&b2, 1, 1, fp);
-            } else if ((b >> 3 & 0x1f) == 0x1e) { // 21-bit code point (first byte
-                // 0b11110xxx, 3 bytes follow)
-                v = 0x0;
-                fread(&b1, 1, 1, fp);
-                fread(&b2, 1, 1, fp);
-                fread(&b3, 1, 1, fp);
-            } else { // we are desynchronized
-                v = 0xffffffff;
+        } else { // Otherwise, it's a multi-byte code point
+            if ((b & 0340) == 0300) {
+                // 11-bit code point (2 byte, U+0080 - U+07FF)
+                // Byte 0: 0b110xxxxx
+                // Byte 1: 0b10xxxxxx
+                bytes_read += fread(&b1, 1, 1, fp);
+                printf("2-byte code point: %02x, %02x\n", b, b1);
+                v = ((uint32_t)b1 & 0077) | ((uint32_t)b & 0037)<<6;
+            } else if ((b & 0360) == 0340) {
+                // 16-bit code point (3 byte, U+0800 - U+FFFF)
+                // Byte 0: 0b1110xxxx
+                // Byte 1: 0b10xxxxxx
+                // Byte 2: 0b10xxxxxx
+                bytes_read += fread(&b1, 1, 1, fp);
+                bytes_read += fread(&b2, 1, 1, fp);
+                printf("3-byte code point: %02x, %02x, %02x\n", b, b1, b2);
+                v = ((uint32_t)b2 & 0077) | ((uint32_t)b1 & 0077)<<6 | ((uint32_t)b & 0017)<<12;
+            } else if ((b & 0370) == 0360) {
+                // 21-bit code point (4 byte, U+10000 - U+10FFFF)
+                // Byte 0: 0b11110xxx
+                // Byte 1: 0b10xxxxxx
+                // Byte 2: 0b10xxxxxx
+                // Byte 3: 0b10xxxxxx
+                bytes_read += fread(&b1, 1, 1, fp);
+                bytes_read += fread(&b2, 1, 1, fp);
+                bytes_read += fread(&b3, 1, 1, fp);
+                printf("4-byte code point: %02x, %02x, %02x, %02x\n", b, b1, b2, b3);
+                v = ((uint32_t)b3 & 0077) | ((uint32_t)b2 & 0077)<<6 | ((uint32_t)b1 & 0077)<<12 | ((uint32_t)b & 0007)<<18;
+            } else {
+                // We are desynchronized or the file is corrupted
+                printf("Desynchronized at %zu bytes\n", bytes_read);
             }
         }
-        printf("0x%04lX\r\n", v);
+        printf("v: 0x%06x\n", v);
     }
     return 0;
 }
