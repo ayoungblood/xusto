@@ -198,7 +198,8 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
         fp_list->files = (FILE**)malloc(sizeof(FILE*)*(size_t)(fp_list->length));
         fp_list->filenames = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
         fp_list->files[0] = stdin;
-        fp_list->filenames[0] = strdup("stdin");
+        fp_list->filenames[0] = malloc(6*sizeof(char));
+        strncpy(fp_list->filenames[0], "stdin", 6);
     }
     // If we reach here, we have succesfully opened all the files
     return RETURN_OK; // everything is OK

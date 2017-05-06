@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <getopt.h>
-#include <string.h>
 
 #include "util.h"
 
