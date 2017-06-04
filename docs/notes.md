@@ -3,9 +3,18 @@ Notes and Ideas
 
 **Preprocessor/Parser**
 
-We need a preprocessor/parser to load code into the execution space: the 2D nature of a plaintext file (source code) must be smooshed into the 3D execution space.
+The preprocessor/parser loads instructions from the source file into the execution space: the source files (regular text files encoded with the UTF-8) are one-dimensional byte streams, typically displayed as two-dimensional plaintext, but must be squished into a three-dimensional execution space. Care is taken to ensure that a typical text file will map intuitively into a 2D plane matching its appearance in a text editor, and additional characters may be used to place instructions at arbitrary locations in the 3D execution space.
 
-This is done by reserving certain characters for parser instruction. The first 32 code points in UTF-8 (which are identical to the first 32 codes of ASCII) are reserved as parser instructions. The parser instruction mapping is designed to be as logical as possible, letting the control chars move a "virtual cursor" through the execution space during parsing.
+This is done by reserving certain characters for parser instruction. The first 32 code points in UTF-8 (which are identical to the first 32 ASCII characters) are reserved as parser instructions. The parser instruction mapping is designed to be as logical as possible, letting the control chars move a "virtual cursor" (a write pointer) through the execution space during parsing in a way that matches the behavior of a plaintext file.
+
+As the parser instructions refer to moving through 3D space, the instruction descriptions use a consistent convention when referring to movement through 3D space. The space is modeled with X,Y,Z coordinates. Relative to a computer screen, X may be thought of as "left/right", Y is "up/down" and Z is "into/out":
+
+- +x: right
+- -x: left
+- +y: down
+- -y: up
+- +z: into
+- -z: out
 
 **Instruction decoding**
 

@@ -1,38 +1,38 @@
-U+0000 - NUL
+U+0000 - NUL, Does nothing
 U+0001 - SOH, <reserved>
 U+0002 - STX, <reserved>
-U+0003 - ETX, parser interrupt
-U+0004 - EOT, parser end of file (remaining contents ignored)
-U+0005 - ENQ
-U+0006 - ACK
-U+0007 - BEL, '\a' whacks the parser, causing it to say "OUCH"
-U+0008 - BS, '\b' parser retreat one codepoint
-U+0009 - HT, '\t' parser skip 4
-U+000a - LF, '\n' parser end of line
-U+000b - VT, '\v' parser descend line
-U+000c - FF, '\f' parser end of frame
-U+000d - CR, '\r' parser end of line
-U+000e - SO, parser alternate mode start
-U+000f - SI, parser alternate mode end
-U+0010 - DLE
-U+0011 - DC1
-U+0012 - DC2
-U+0013 - DC3
-U+0014 - DC4
-U+0015 - NAK
-U+0016 - SYN
-U+0017 - ETB, parser stop
-U+0018 - CAN, parser exit and dump
-U+0019 - EM
-U+001a - SUB
-U+001b - ESC
-U+001c - FS, parser decrement pane
-U+001d - GS, parser increment pane
-U+001e - RS, parser toggle MEMORY
-U+001f - US, parser toggle interpreter options
+U+0003 - ETX, (^C) @TODO Stop parsing and exit immediately
+U+0004 - EOT, (^D) @TODO Stop parsing (EOF)
+U+0005 - ENQ, <reserved>
+U+0006 - ACK, <reserved>
+U+0007 - BEL, Whack the parser, causing it to say "OUCH"
+U+0008 - BS,  Move write pointer one position leftwards (-x)
+U+0009 - HT,  Move write pointer four positions rightwards (+x)
+U+000a - LF,  Move write pointer one position downwards and reset left/right (+y, ±x)
+U+000b - VT,  Move write pointer one position downwards (+y)
+U+000c - FF,  Move write pointer one position into (+z)
+U+000d - CR,  Reset the write pointer left/right (±x)
+U+000e - SO,  <reserved>
+U+000f - SI,  <reserved>
+U+0010 - DLE, <reserved>
+U+0011 - DC1, <reserved> (XON)
+U+0012 - DC2, <reserved>
+U+0013 - DC3, <reserved> (XOFF)
+U+0014 - DC4, <reserved>
+U+0015 - NAK, <reserved>
+U+0016 - SYN, <reserved>
+U+0017 - ETB, <reserved>
+U+0018 - CAN, @TODO Stop parsing and dump (do not execute)
+U+0019 - EM,  @TODO Stop parsing (EOF)
+U+001a - SUB, <reserved>
+U+001b - ESC, <reserved>
+U+001c - FS,  <reserved>
+U+001d - GS,  <reserved>
+U+001e - RS,  <reserved>
+U+001f - US,  <reserved>
 U+0020 - SPACE, no-op
 U+0021 - !, logical not
-U+0022 - ", PUSHCHAR mode
+U+0022 - ", toggle PUSHCHAR mode
 U+0023 - #, store iptr (drop portal)
 U+0024 - $,
 U+0025 - %, pop a, b; push b%a
