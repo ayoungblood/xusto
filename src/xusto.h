@@ -14,11 +14,13 @@
 #include "i18n.h"
 
 // Interpreter state flag bits
-#define STATE_F_EXECUTE 0x01
-#define STATE_F_PUSHCHAR 0x02
-#define STATE_F_EXCEPTION 0x20
-#define STATE_F_VERBOSE 0x40
-#define STATE_F_DEBUG 0x80
+#define STATE_F_EXECUTE         (1<<0)
+#define STATE_F_PUSHCHAR        (1<<1)
+#define STATE_F_EXCEPTION       (1<<4)
+#define STATE_F_VERBOSE         (1<<5)
+#define STATE_F_DEBUG           (1<<7)
+#define STATE_F_DEBUGLEVELSTART (8)
+#define STATE_F_DEBUGLEVELMASK  (3)
 
 //void parse(const char *filename);
 //void message(const char *msg, int code, char *extra);

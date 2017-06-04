@@ -34,6 +34,11 @@ int main(int argc, char **argv) {
 }
 
 int parse(FILE *fp, char *filename) {
+    // temporary stuff
+    space_t space;
+    vector3_t wp = {0,0,0};
+    // end
+
     long file_length = 0;
     size_t bytes_read = 0, rv = 0;
     unsigned char b = 0, b1 = 0, b2 = 0, b3 = 0; // bytes from the file
@@ -94,8 +99,78 @@ int parse(FILE *fp, char *filename) {
                 v = b;
             }
         }
-        printf("v: 0x%06x\n", v);
+        // printf("v: 0x%06x\n", v);
+        if (v <= 0x1f) { // character is a parser instruction, execute it
+            printf("parser instruction: 0x%02x\n", v);
+            switch (v) {
+                case 0x00: // NUL (^@) Null
+                    // do absolutely nothing
+                    break;
+                case 0x03: // ETX (^C) End of Text
+                    // should probably do something with this
+                    break;
+                case 0x04: // EOT (^D) End of Transmission
+                    // should probably do something with this
+                    break;
+                case 0x07: // BEL (^G) Bell
+                    // Whack the parser, causing it to say "OUCH"
+                    if (flags & MASK_VERBOSE) {
+                        cprintf(ANSI_C_YELLOW, "OUCH (%s@b%zu)\n", filename, bytes_read);
+                    } else {
+                        cprintf(ANSI_C_YELLOW, "OUCH\n");
+                    }
+                    break;
+                case 0x08: // BS (^H) Backspace
+                    // move left by 1
+                    wp.x -= 1;
+                    break;
+                case 0x09: // HT (^I) Horizontal Tabulation
+                    // move right by 4
+                    wp.x += 4;
+                    break;
+                case 0x0a: // LF (^J) Line Feed
+                    // reset left/right and move down by 1 (*nix line endings)
+                    wp.x = 0;
+                    wp.y += 1;
+                    break;
+                case 0x0b: // VT (^K) Vertical Tabulation
+                    // move down by 1
+                    wp.y += 1;
+                    break;
+                case 0x0c: // FF (^L) Form Feed
+                    // move into by 1
+                    wp.z += 1;
+                    break;
+                case 0x0d: // CR (^M) Carriage Return
+                    // reset left/right
+                    wp.x = 0;
+                    break;
+                case 0x18: // CAN (^X) Cancel
+                    // @TODO parser exit and dump
+                    break;
+                case 0x19: // EM (^Y) End of medium
+                    // @TODO parser stop
+                    break;
+                default: // Reserved/unimplemented/non-existent parser instruction
+                    cprintf(ANSI_C_RED, "Reserved parser instruction in %s@b%zu: 0x%02x. Exiting.\n",
+                        filename, bytes_read, v);
+                    return 1; // @TODO FIXME
+            }
+        } else { // character is a regular instruction, store it and advance the parser pointer
+            printf("regular instruction: 0x%06x\n", v);
+            space.block[wp.z][wp.y][wp.x].i = v;
+            ++wp.x;
+        }
+        printf("wp = (%lld,%lld,%lld)\n",wp.x,wp.y,wp.z);
     }
+    printf("start dump\n");
+    for (int i = 0; i < 12; ++i) {
+        for (int j = 0; j < 12; ++j) {
+            printf("%04llx ", space.block[0][i][j].i);
+        }
+        printf("\n");
+    }
+    printf("end dump\n");
     return 0;
 }
 
@@ -129,13 +204,13 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
         static struct option long_options[] = {
             /* Simulator options */
             {"color",           required_argument,  0, 'c'}, // (disabled,auto,force)
-            {"debug",           no_argument,        0, 'd'}, // level
+            {"debug",           optional_argument,  0, 'd'}, // level
             {"help",            no_argument,        0, 'h'},
             {"version",         no_argument,        0, 'V'},
             {"verbose",         no_argument,        0, 'v'},
             {0, 0, 0, 0}
         };
-        c = getopt_long (argc, argv, "c:dhVv",long_options, &option_index);
+        c = getopt_long (argc, argv, "c:d::hVv",long_options, &option_index);
         if (c == -1) break; // Detect the end of the options.
 
         switch (c) {
@@ -152,18 +227,45 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                 }
                 break;
             case 'd': // --debug
-                *f |= MASK_DEBUG;
+                *f |= MASK_DEBUG; // debug flag is set regardless of level
+                if (optarg != NULL) {
+                    if (!strcmp(optarg,"d") || !strcmp(optarg,"1")) {
+                        *f |= (1 & STATE_F_DEBUGLEVELMASK) << STATE_F_DEBUGLEVELSTART;
+                    } else if (!strcmp(optarg,"dd") || !strcmp(optarg,"2")) {
+                        *f |= (2 & STATE_F_DEBUGLEVELMASK) << STATE_F_DEBUGLEVELSTART;
+                    } else if (!strcmp(optarg,"ddd") || !strcmp(optarg,"3")) {
+                        *f |= (3 & STATE_F_DEBUGLEVELMASK) << STATE_F_DEBUGLEVELSTART;
+                    } else {
+                        printf("Invalid debug option argument: %s\n", optarg);
+                    }
+                }
                 break;
             case 'h': // --help
-                printf( "Usage: %s [option]... [file ...]\n" \
-                        "Run %s on on source file(s). If no file is provided, \n" \
-                        "read from " ANSI_BOLD "stdin" ANSI_RESET ".\n",
+                printf( "Usage: %s [option]... [file ...]\n"
+                        "Run %s on source file(s). If no file is provided, \n"
+                        "read from " ANSI_BOLD "stdin" ANSI_RESET ".\n\n"
+                        "Options:\n"
+                        "    "ANSI_BOLD"--color "ANSI_RESET ANSI_UNDER"mode"ANSI_RESET ANSI_BOLD", -c "ANSI_RESET ANSI_UNDER"mode"ANSI_RESET ANSI_BOLD"\n"
+                        "       Colorized output behavior. "ANSI_UNDER"mode"ANSI_RESET" may be "ANSI_BOLD"disable"ANSI_RESET", which disables\n"
+                        "       colorized output; "ANSI_BOLD"force"ANSI_RESET", which colorizes the output; or "ANSI_BOLD"auto"ANSI_RESET",\n"
+                        "       the default, which attempts to automatically detect whether to colorize\n"
+                        "       based on environment variables.\n"
+                        "    "ANSI_BOLD"--debug, -d"ANSI_RESET"\n"
+                        "       Enables debugging output. Disabled by default.\n" \
+                        "    "ANSI_BOLD"--help, -h"ANSI_RESET"\n"
+                        "       Prints this usage information and exits.\n"
+                        "    "ANSI_BOLD"--version, -V"ANSI_RESET"\n"
+                        "       Prints simulator version information.\n"
+                        "    "ANSI_BOLD"--verbose, -v"ANSI_RESET"\n"
+                        "       Enable verbose output. Disabled by default.\n"
+                        "\nFor options with string arguments, arguments may be shortened\n"
+                        "as long as the arguments are not ambiguous.\n",
                         TARGET_STRING, TARGET_STRING);
                 return -1; // caller should exit without errors
             case 'V': // --version
                 printf("%s - Interpreter for the Xusto language (v. %s)\n",
                     TARGET_STRING,VERSION_STRING);
-                return -1; // caller should exit ok
+                return -1; // caller should exit without errors
             case 'v': // --verbose
                 *f |= MASK_VERBOSE;
                 break;
