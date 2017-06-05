@@ -1,6 +1,50 @@
+# .gitignore
+
+# Project targets
+xusto
+unit-test/vector3-test
+
+# Object files
 *.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
 *.exe
 *.out
-xusto.dSYM
-xusto
-*.h.gch
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+
+# Other intermediate and assembly files
+*.bc
+*.i
+*.s
+
+# Unignore files that we care about
+# Note that libgit2 (and therefore Github Desktop) has a bug that makes
+# negation statements not work properly. However, adding the file(s) manually
+# with 'git add' causes them to appear.
+# https://github.com/libgit2/libgit2/issues/3224
