@@ -161,12 +161,12 @@ int parse(FILE *fp, char *filename) {
             space.block[wp.z][wp.y][wp.x].i = v;
             ++wp.x;
         }
-        printf("wp = (%lld,%lld,%lld)\n",wp.x,wp.y,wp.z);
+        printf("wp = (%lld,%lld,%lld)\n",(long long)wp.x,(long long)wp.y,(long long)wp.z);
     }
     printf("start dump\n");
     for (int i = 0; i < 12; ++i) {
         for (int j = 0; j < 12; ++j) {
-            printf("%04llx ", space.block[0][i][j].i);
+            printf("%04llx ", (long long)space.block[0][i][j].i);
         }
         printf("\n");
     }
