@@ -4,6 +4,15 @@
 
 #include "types.h"
 
+/* Syntactic sugar for creating and setting a vector3 */
+vector3_t vector3(xint_t x, xint_t y, xint_t z) {
+    vector3_t rv;
+    rv.x = x;
+    rv.y = y;
+    rv.z = z;
+    return rv;
+}
+
 /* Returns 0 if the vectors are equal, non-zero otherwise */
 int vector3_cmp(const vector3_t a, const vector3_t b) {
     if (a.x == b.x && a.y == b.y && a.z == b.z) {
@@ -12,11 +21,11 @@ int vector3_cmp(const vector3_t a, const vector3_t b) {
     return 1;
 }
 
-/* Syntactic sugar for creating and setting a vector3 */
-vector3_t vector3(xint_t x, xint_t y, xint_t z) {
+/* Adds two vector3 */
+vector3_t vector3_add(const vector3_t a, const vector3_t b) {
     vector3_t rv;
-    rv.x = x;
-    rv.y = y;
-    rv.z = z;
+    rv.x = a.x + b.x;
+    rv.y = a.y + b.y;
+    rv.z = a.z + b.z;
     return rv;
 }

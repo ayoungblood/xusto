@@ -23,10 +23,12 @@ typedef union {
 typedef struct vector3_t {
     xint_t x, y, z;
 } vector3_t;
-/* Returns 0 if the vectors are equal, non-zero otherwise */
-int vector3_cmp(const vector3_t a, const vector3_t b);
 /* Syntactic sugar for creating and setting a vector3 */
 vector3_t vector3(xint_t x, xint_t y, xint_t z);
+/* Returns 0 if the vectors are equal, non-zero otherwise */
+int vector3_cmp(const vector3_t a, const vector3_t b);
+/* Adds two vector3 */
+vector3_t vector3_add(const vector3_t a, const vector3_t b);
 
 // Execution space type
 typedef struct space_t {
