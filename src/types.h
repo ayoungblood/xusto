@@ -1,5 +1,5 @@
 /* types.h
- * Types for just about everything
+ * Simple types and helper functions for those types
  */
 
 #ifndef _TYPES_H
@@ -18,10 +18,16 @@ typedef union {
     xint_t i;
     xfloat_t f;
 } cell_t;
-// 3-element vector type
+
+/* 3-element vector type */
 typedef struct vector3_t {
     xint_t x, y, z;
 } vector3_t;
+/* Returns 0 if the vectors are equal, non-zero otherwise */
+int vector3_cmp(const vector3_t a, const vector3_t b);
+/* Syntactic sugar for creating and setting a vector3 */
+vector3_t vector3(xint_t x, xint_t y, xint_t z);
+
 // Execution space type
 typedef struct space_t {
     cell_t block[8][256][256];
