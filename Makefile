@@ -79,10 +79,12 @@ all: $(TARGET)
 run: $(TARGET)
 		./$(TARGET) u.3
 
-# Build and run unit tests
+# Build, run, and clean unit tests
 test: $(OBJECTS) all
 		$(CC) $(CFLAGS) src/types.o $(LIBS) -o unit-test/vector3-test unit-test/vector3-test.c
 		unit-test/vector3-test
+		-@$(RM) unit-test/vector3-test
+		-@$(RM) -r unit-test/*.dSYM
 
 clean:
 		-$(RM) src/*.o

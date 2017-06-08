@@ -49,19 +49,19 @@ static const char *test_vector3_cmp() {
     return 0;
 }
 
-static const char *test_vector3_add() {
+static const char *test_vector3_addv() {
     vector3_t a, b, c, d, z = vector3(0,0,0);
     a = vector3(1,2,3);
     b = vector3(-1,-2,-3);
-    c = vector3_add(a,b);
+    c = vector3_addv(a,b);
     mu_assert(_FL "vectors should be equal", vector3_cmp(c,z) == 0);
     a = vector3(11,22,33);
     b = vector3(11,22,33);
-    c = vector3_add(a,b);
+    c = vector3_addv(a,b);
     d = vector3(22,44,66);
     mu_assert(_FL "vectors should be equal", vector3_cmp(c,d) == 0);
     a = vector3(-22,-44,-66);
-    c = vector3_add(a,z);
+    c = vector3_addv(a,z);
     mu_assert(_FL "vectors should be equal", vector3_cmp(c,a) == 0);
     return 0;
 }
@@ -69,7 +69,7 @@ static const char *test_vector3_add() {
 static const char *all_tests() {
     mu_run_test(test_vector3);
     mu_run_test(test_vector3_cmp);
-    mu_run_test(test_vector3_add);
+    mu_run_test(test_vector3_addv);
     return 0;
 }
 
