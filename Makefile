@@ -87,6 +87,10 @@ test: $(OBJECTS) all
 		$(CC) $(CFLAGS) src/types.o $(LIBS) -o unit-test/vector3-test unit-test/vector3-test.c
 		unit-test/vector3-test
 		-@$(RM) unit-test/vector3-test
+		# space_hashtable tests
+		$(CC) $(CFLAGS) src/types.o src/space_hashtable.o $(LIBS) -o unit-test/space_hashtable-test unit-test/space_hashtable-test.c
+		unit-test/space_hashtable-test
+		-@$(RM) unit-test/space_hashtable-test
 		@# clean up
 		-@$(RM) -r unit-test/*.dSYM
 
