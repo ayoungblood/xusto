@@ -158,7 +158,7 @@ int parse(FILE *fp, char *filename) {
             }
         } else { // character is a regular instruction, store it and advance the parser pointer
             printf("regular instruction: 0x%06x\n", v);
-            space.block[wp.z][wp.y][wp.x].i = v;
+            //space.block[wp.z][wp.y][wp.x].i = v;
             ++wp.x;
         }
         printf("wp = (%lld,%lld,%lld)\n",(long long)wp.x,(long long)wp.y,(long long)wp.z);
@@ -166,9 +166,9 @@ int parse(FILE *fp, char *filename) {
     printf("start dump\n");
     for (int i = 0; i < 12; ++i) {
         for (int j = 0; j < 12; ++j) {
-            printf("%04llx ", (long long)space.block[0][i][j].i);
+            //printf("%04llx ", (long long)space.block[0][i][j].i);
         }
-        printf("\n");
+        //printf("\n");
     }
     printf("end dump\n");
     return 0;

@@ -9,6 +9,8 @@
 #include <getopt.h>
 
 #include "util.h"
+#include "types.h"
+#include "space.h"
 
 #define LANG_EN
 #include "i18n.h"

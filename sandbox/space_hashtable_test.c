@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     cell_t cell, val;
     vector3_t vec;
     space_hashtable_t *sht = NULL;
-    sht = space_hashtable_init(2);
+    sht = space_hashtable_create(2);
 
     vec = vector3(0,0,0);
     cell = space_hashtable_get(sht, vec);

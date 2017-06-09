@@ -8,11 +8,11 @@
 /* Create and initialize a new hashtable.
  * size - Number of entries to initialize the hashtable with, must be a power of two
  * Returns a pointer to the hashtable if succesfully initalized, NULL otherwise */
-space_hashtable_t *space_hashtable_init(unsigned int size) {
+space_hashtable_t *space_hashtable_create(unsigned long long size) {
     space_hashtable_t *hashtable = NULL;
-    unsigned int i;
+    unsigned long long i;
     if ((size == 0) || (size & (size - 1))) {
-        printf("size (%u) must be a power of two >= 1\n", size);
+        printf("size (%llu) must be a power of two >= 1\n", size);
         return NULL;
     }
     // Allocate the table
@@ -32,19 +32,31 @@ space_hashtable_t *space_hashtable_init(unsigned int size) {
 }
 /* Deallocate and destroy an existing hashtable */
 void space_hashtable_destroy(space_hashtable_t *hashtable) {
-    // @TODO FIXME
-    (void)hashtable;
-    printf("I'm Unimplemented!\n");
+    unsigned long long i;
+    space_hashtable_entry_t *next = NULL, *orphan = NULL;
+    for (i = 0; i < hashtable->size; ++i) {
+        //printf("attempting to destroy hashtable->table[%llu]\n", i);
+        next = hashtable->table[i];
+        while (next != NULL) {
+            //printf("%s: searching, next = %p\n", __func__, (void *)next);
+            orphan = next;
+            next = next->next;
+            free(orphan);
+        }
+    }
+    free(hashtable->table);
+    free(hashtable);
 }
 /* Hash a key for a given hashtable */
-unsigned int space_hashtable_hash(space_hashtable_t *hashtable, vector3_t key) {
+unsigned long long space_hashtable_hash(space_hashtable_t *hashtable, vector3_t key) {
     // Unsigned long will be at least 32 bits. Need a single integer to hash, build it from vector3
-    // 12 bits come from x, y, and 8 from z, then we hash the integer as usual
-    unsigned long int hash = (unsigned long)((key.x & 0x3ff) | (key.y & 0x3ff)<<12 | (key.z & 0xff)<<24);
+    // 24 bits come from x, y, and 16 from z, then we hash the integer as usual
+    unsigned long long hash = (unsigned long long)((key.x & 0xffffff) | (key.y & 0xffffff)<<24 | (key.z & 0xffff)<<48);
+    printf("%s: composited hash = 0x%016llx\n", __func__, hash);
     // Hash function from https://stackoverflow.com/a/12996028/
-    hash = ((hash >> 16) ^ hash) * 0x45d9f3b;
-    hash = ((hash >> 16) ^ hash) * 0x45d9f3b;
-    hash = (hash >> 16) ^ hash;
+    hash = (hash ^ (hash >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    hash = (hash ^ (hash >> 27)) * 0x94d049bb133111ebULL;
+    hash = hash ^ (hash >> 31);
     return hash % hashtable->size;
 }
 /* Create a new key-value pair */
@@ -61,19 +73,19 @@ space_hashtable_entry_t *space_hashtable_new(vector3_t key, cell_t val) {
 /* Insert a key-value pair into a hashtable */
 void space_hashtable_set(space_hashtable_t *hashtable, vector3_t key, cell_t val) {
     printf("%s: hashtable = %p, key = (%lld, %lld, %lld), val.i = %lld\n",
-        __func__, (void *)hashtable, (long long)key.x, (long long)key.y, (long long)key.z, val.i);
-    unsigned int index = 0;
+        __func__, (void *)hashtable, (long long)key.x, (long long)key.y, (long long)key.z, (long long)val.i);
+    unsigned long long index = 0;
     space_hashtable_entry_t *new = NULL;
     space_hashtable_entry_t *next = NULL;
     space_hashtable_entry_t *last = NULL;
     index = space_hashtable_hash(hashtable, key);
-    printf("%s: key = (%lld, %lld, %lld), index = %u\n",
+    printf("%s: key = (%lld, %lld, %lld), index = %llu\n",
         __func__, (long long)key.x, (long long)key.z, (long long)key.z, index);
     next = hashtable->table[index];
     printf("%s: next = %p\n", __func__, (void *)next);
     if (next == NULL) {
         // First time inserting at this index
-        printf("%s: First time inserting at index %d\n", __func__, index);
+        printf("%s: First time inserting at index %llu\n", __func__, index);
         new = space_hashtable_new(key, val);
         hashtable->table[index] = new;
     } else {
@@ -108,10 +120,10 @@ void space_hashtable_set(space_hashtable_t *hashtable, vector3_t key, cell_t val
 cell_t space_hashtable_get(space_hashtable_t *hashtable, vector3_t key) {
     printf("%s: hashtable = %p, key = (%lld, %lld, %lld)\n",
         __func__, (void *)hashtable, (long long)key.x, (long long)key.y, (long long)key.z);
-    unsigned int index = 0;
+    unsigned long long index = 0;
     space_hashtable_entry_t *next = NULL;
     index = space_hashtable_hash(hashtable, key);
-    printf("%s: key = (%lld, %lld, %lld), index = %u\n",
+    printf("%s: key = (%lld, %lld, %lld), index = %llu\n",
         __func__, (long long)key.x, (long long)key.z, (long long)key.z, index);
     next = hashtable->table[index];
     printf("%s: next = %p\n", __func__, (void *)next);
