@@ -40,6 +40,8 @@ CFLAGS=-g -std=c11 -Wall -Wextra -pedantic -O3 -Wshadow -Wpointer-arith \
 # echo | gcc -E -dM -
 # gcc -E
 
+LIBS =
+
 # Preprocessor flags
 CPPFLAGS =
 LDFLAGS = -g -Wall -Wextra
@@ -81,9 +83,11 @@ run: $(TARGET)
 
 # Build, run, and clean unit tests
 test: $(OBJECTS) all
+		# vector3 tests
 		$(CC) $(CFLAGS) src/types.o $(LIBS) -o unit-test/vector3-test unit-test/vector3-test.c
 		unit-test/vector3-test
 		-@$(RM) unit-test/vector3-test
+		@# clean up
 		-@$(RM) -r unit-test/*.dSYM
 
 clean:

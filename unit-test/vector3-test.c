@@ -2,9 +2,6 @@
  * Very simple unit tests for vector3_t from src/types.h
  */
 
-//#include <stdio.h>
-//#include <stdbool.h>
-
 #include "minunit.h"
 #include "../src/types.h"
 
