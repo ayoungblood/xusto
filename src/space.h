@@ -17,7 +17,7 @@ typedef struct space_t {
 } space_t;
 
 /* Create and initialize a new space */
-space_t *space_create(vector3_t block_size);
+space_t *space_create(vector3_t block_size, unsigned long long hash_size);
 /* Deallocate and destroy an existing space */
 void space_destroy(space_t *space);
 /* Set a cell in the space */

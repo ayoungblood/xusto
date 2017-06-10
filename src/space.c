@@ -16,16 +16,16 @@ space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
         return NULL;
     }
     // Allocate the block
-    unsigned long long block_size_bytes = block_size.x * block_size.y * block_size.z * sizeof(cell_t);
+    unsigned long long block_size_bytes = (unsigned long long)block_size.x * (unsigned long long)block_size.y * (unsigned long long)block_size.z * sizeof(cell_t);
     printf("Allocating block array, size is %llu bytes\n", block_size_bytes);
-    if ((space.block = malloc(block_size_bytes)) == NULL) {
+    if ((space->block = malloc(block_size_bytes)) == NULL) {
         return NULL;
     }
-    space.block_size = block_size;
+    space->block_size = block_size;
     // Default block offset to (0,0,0) for now
-    space.block_offset = vector3(0,0,0);
+    space->block_offset = vector3(0,0,0);
     // Allocate the space_hashtable
-    if ((space.hash = space_hashtable_create(hash_size)) == NULL) {
+    if ((space->hash = space_hashtable_create(hash_size)) == NULL) {
         printf("Failed to create space_hashtable\n");
         return NULL;
     }
