@@ -57,6 +57,8 @@ unsigned long long space_hashtable_hash(space_hashtable_t *hashtable, vector3_t 
     hash = (hash ^ (hash >> 30)) * 0xbf58476d1ce4e5b9ULL;
     hash = (hash ^ (hash >> 27)) * 0x94d049bb133111ebULL;
     hash = hash ^ (hash >> 31);
+    printf("%s: hashed hash = 0x%016llx, hash result = %llu\n", __func__, hash, hash % hashtable->size);
+    // @TODO: speed this up by storing a bit mask and making this a bit AND
     return hash % hashtable->size;
 }
 /* Create a new key-value pair */
