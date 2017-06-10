@@ -1,4 +1,4 @@
-/* src/vector3-test.c
+/* unit-test/vector3-test.c
  * Very simple unit tests for vector3_t from src/types.h
  */
 

@@ -1,4 +1,4 @@
-/* test/minunit.h
+/* unit-test/minunit.h
  * From http://www.jera.com/techinfo/jtns/jtn002.html, slightly modified
  * Freely available with no warranty
  * Not quite the simplest unit test framework

@@ -1,5 +1,5 @@
-/* src/vector3-test.c
- * Very simple unit tests for vector3_t from src/types.h
+/* unit-test/space_hashtable-test.c
+ * Unit tests for space_hashtable_t_t from src/space_hashtable.h
  */
 
 #include <stdlib.h>
