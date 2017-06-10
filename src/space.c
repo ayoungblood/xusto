@@ -39,12 +39,27 @@ void space_destroy(space_t *space) {
 }
 /* Set a cell in the space */
 void space_set(space_t *space, vector3_t index, cell_t val) {
-    // @TODO FIXME
-    return;
+    if (index.x >= space->block_offset.x && index.x < space->block_size.x + space->block_offset.x &&
+        index.y >= space->block_offset.y && index.y < space->block_size.y + space->block_offset.y &&
+        index.z >= space->block_offset.z && index.z < space->block_size.z + space->block_offset.z) {
+        // Index is inside block, access block directly
+        space->block[index.z][index.y][index.x] = val;
+    } else {
+        // Index is outside block, set a value in the hashtable
+        space_hashtable_set(space->hash, index, val);
+    }
 }
 /* Get a cell in the space */
 cell_t space_get(space_t *space, vector3_t index) {
     cell_t cell;
-    // @TODO FIXME
+    if (index.x >= space->block_offset.x && index.x < space->block_size.x + space->block_offset.x &&
+        index.y >= space->block_offset.y && index.y < space->block_size.y + space->block_offset.y &&
+        index.z >= space->block_offset.z && index.z < space->block_size.z + space->block_offset.z) {
+        // Index is inside block, access block directly
+        cell = space->block[index.z][index.y][index.x];
+    } else {
+        // Index is outside block, get value from the hashtable
+        cell = space_hashtable_get(space->hash, index);
+    }
     return cell;
 }

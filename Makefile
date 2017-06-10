@@ -91,6 +91,10 @@ test: $(OBJECTS) all
 		$(CC) $(CFLAGS) src/types.o src/space_hashtable.o $(LIBS) -o unit-test/space_hashtable-test unit-test/space_hashtable-test.c
 		unit-test/space_hashtable-test
 		-@$(RM) unit-test/space_hashtable-test
+		# space tests
+		$(CC) $(CFLAGS) src/types.o src/space_hashtable.o src/space.o $(LIBS) -o unit-test/space-test unit-test/space-test.c
+		unit-test/space-test
+		-@$(RM) unit-test/space-test
 		@# clean up
 		-@$(RM) -r unit-test/*.dSYM
 
