@@ -68,6 +68,9 @@ endif
 
 STRFLAGS = -D TARGET_STRING="\"$(TARGET)\"" -D VERSION_STRING="\"$(VERSION)\""
 
+# Silence a few warnings in unit tests
+TESTFLAGS = -Wno-strict-prototypes -Wno-old-style-definition
+
 # Build all the object files
 %.o: %.c $(HEADERS)
 		$(CC) $(STRFLAGS) $(CFLAGS) -c $< -o $@
@@ -84,15 +87,15 @@ run: $(TARGET)
 # Build, run, and clean unit tests
 test: $(OBJECTS) all
 		# vector3 tests
-		$(CC) $(CFLAGS) src/types.o $(LIBS) -o unit-test/vector3-test unit-test/vector3-test.c
+		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o $(LIBS) -o unit-test/vector3-test unit-test/vector3-test.c
 		unit-test/vector3-test
 		-@$(RM) unit-test/vector3-test
 		# space_hashtable tests
-		$(CC) $(CFLAGS) src/types.o src/space_hashtable.o $(LIBS) -o unit-test/space_hashtable-test unit-test/space_hashtable-test.c
+		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o src/space_hashtable.o $(LIBS) -o unit-test/space_hashtable-test unit-test/space_hashtable-test.c
 		unit-test/space_hashtable-test
 		-@$(RM) unit-test/space_hashtable-test
 		# space tests
-		$(CC) $(CFLAGS) src/types.o src/space_hashtable.o src/space.o $(LIBS) -o unit-test/space-test unit-test/space-test.c
+		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o src/space_hashtable.o src/space.o $(LIBS) -o unit-test/space-test unit-test/space-test.c
 		unit-test/space-test
 		-@$(RM) unit-test/space-test
 		@# clean up

@@ -171,7 +171,6 @@ static const char *test_space_hashtable_set_get_large() {
     // Check lots of cells
     for (i = 0; i < LARGE; ++i) {
         cell = space_hashtable_get(hash, vectors[i]);
-        if (cell.i != cells[i].i) printf("Cell value mismatch @ i = %llu, cell.i = %llu != cells[i].i = %llu\n", i, cell.i, cells[i].i);
         mu_assert(_FL "bad cell value from vectors", cell.i == cells[i].i);
     }
 
