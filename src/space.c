@@ -7,6 +7,7 @@
 /* Create and initialize a new space */
 space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
     space_t *space = NULL;
+    xint_t k, j, i;
     if ((block_size.x <= 0) || (block_size.y <= 0) || (block_size.z <= 0)) {
         printf("All components of block_size must be positive\n");
         return NULL;
@@ -15,11 +16,16 @@ space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
     if ((space = malloc(sizeof(space_t))) == NULL) {
         return NULL;
     }
-    // Allocate the block
-    unsigned long long block_size_bytes = (unsigned long long)block_size.x * (unsigned long long)block_size.y * (unsigned long long)block_size.z * sizeof(cell_t);
-    printf("Allocating block array, size is %llu bytes\n", block_size_bytes);
-    if ((space->block = malloc(block_size_bytes)) == NULL) {
-        return NULL;
+    // Allocate the block and initialize it
+    space->block = (cell_t***)malloc((unsigned long long)block_size.z * sizeof(cell_t**));
+    for (k = 0; k < block_size.z; ++k) {
+        space->block[k] = (cell_t**)malloc((unsigned long long)block_size.y * sizeof(cell_t*));
+        for (j = 0; j < block_size.y; ++j) {
+            space->block[k][j] = (cell_t*)malloc((unsigned long long)block_size.x * sizeof(cell_t));
+            for (i = 0; i < block_size.x; ++i) {
+                space->block[k][j][i].i = 0;
+            }
+        }
     }
     space->block_size = block_size;
     // Default block offset to (0,0,0) for now
@@ -33,7 +39,14 @@ space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
 }
 /* Deallocate and destroy an existing space */
 void space_destroy(space_t *space) {
+    xint_t k, j;
     space_hashtable_destroy(space->hash);
+    for (k = 0; k < space->block_size.z; ++k) {
+        for (j = 0; j < space->block_size.y; ++j) {
+            free(space->block[k][j]);
+        }
+        free(space->block[k]);
+    }
     free(space->block);
     free(space);
 }
