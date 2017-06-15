@@ -5,7 +5,7 @@ Notes and Ideas
 
 The preprocessor/parser loads instructions from the source file into the execution space: the source files (regular text files encoded with the UTF-8) are one-dimensional byte streams, typically displayed as two-dimensional plaintext, but must be squished into a three-dimensional execution space. Care is taken to ensure that a typical text file will map intuitively into a 2D plane matching its appearance in a text editor, and additional characters may be used to place instructions at arbitrary locations in the 3D execution space.
 
-This is done by reserving certain characters for parser instruction. The first 32 code points in UTF-8 (which are identical to the first 32 ASCII characters) are reserved as parser instructions. The parser instruction mapping is designed to be as logical as possible, letting the control chars move a "virtual cursor" (a write pointer) through the execution space during parsing in a way that matches the behavior of a plaintext file.
+This is done by reserving certain characters for parser instruction. The first 32 code points in UTF-8 (which are identical to the first 32 ASCII characters, and are non-printable) are reserved as parser instructions. The parser instruction mapping is designed to be as logical as possible, letting the control chars move a "virtual cursor" (a write pointer) through the execution space during parsing in a way that matches the behavior of a plaintext file.
 
 As the parser instructions refer to moving through 3D space, the instruction descriptions use a consistent convention when referring to movement through 3D space. The space is modeled with X,Y,Z coordinates. Relative to a computer screen, X may be thought of as "left/right", Y is "up/down" and Z is "into/out":
 
@@ -16,56 +16,71 @@ As the parser instructions refer to moving through 3D space, the instruction des
 - +z: into
 - -z: out
 
+The slightly annoying consequence is that programs with very complex parser instructions may require editing or inspection via a hex editor or modified text editor due to the quantity of non-printable characters. Hopefully, one day there will be custom-built editor for Xusto that makes this easier.
+
 **Instruction decoding**
 
 Because the instruction space is very large (UTF-8 encodes 1,112,064 valid code points), and consequently only a small number of code points map to valid instructions, an array is not a satisfactory strategy for instruction decoding. Nor is a case statement (as was used by the original incarnation of Xusto). Additionally, as we eventually would like to support dynamic instruction remapping, we need to be able to dynamically assign instructions or macros of instructions to arbitrary code points. A hash table of "executable things" (a combination of function pointers for native instructions and microprograms for macros) seems to be a reasonable solution. The code point value indexes into the hash table, and the "executable thing" stored in the hash table, if it exists, is executed. The overhead should be minimal. Eventually, instructions that can reassign and populate the hash table with "executable things" should make the whole thing dynamic.
 
+**Space implementation**
+
+In order to store a three-dimensional instruction space that may be very large in one or more dimensions without an extreme memory cost, we map a small space near the origin directly to a 3D array: accesses near the origin are very efficient. Accesses outside of this locality are instead directed to a hash table that can store cell values at a distance of up to the integer limit of the machine architecture. This all happens regardless of the current bounds of execution space, which may change at runtime (if the program decides to grow or shrink its hyperdonut). This prevents the interpreter from wasting a large quantity of memory allocating a larger and larger cube: the hash table can more easily handle the irregular access patterns that may arise.
+
 **Instruction wish list**
 
-- Instructions to set and get flags
+- Instructions for setting/getting flags
 - File I/O
 - stdin/stdout
 - Floating point support?
-- More flexible type support?
 
 **Project wish list**
 
-- Add CI
-- Add some semblance of integration testing
+- ~~Add CI~~
+- ~~Add some semblance of unit testing~~
+- Bounded vs. bounded space access functions: unbounded for parsing, bounded for execution
+- More flexible/complicated type support
+- Glossary of terms
 
-**Object-oriented nature**
+**Types**
 
-`space_t`: signed type able to store a dimension/size/delta
+`vector3_t`: a point or dimension in 3D space  
+`cell_t`: element of an execution space  
+`space_t`: represents an execution space  
 
-- Cube: represents an execution space
+@TODO
 
-- Stack: provides a stack for program execution
+`stack_t`: stack type and wrappers for program execution
+`state_t`: program state type
 
-- State: stores the execution state
-    - InstructionPointer
-        - `space_t[3]`
-    - InstructionVector
-        - `space_t[3]`
-    - Stack (ref)
-    - Portal: stores the portal location
-        - `space_t[3]`
-    - Warp: stores the execution space warp coefficients
-        - `space_t[3]`
-    - Flags: boolean flag array
+- state: stores the execution state
+    - instruction_pointer: current location in the program space
+        - `vector3_t`
+    - instruction_vector: direction of instruction pointer movement
+        - `vector3_t`
+    - stack: the stack on which the execution is happening on
+        - `stack_t`
+    - portal: stores the portal location
+        - `vector3_t`
+    - warp: stores the execution space warp coefficients
+        - `vector3_t`
+    - flags: boolean flag array
+        - `flags_t`
 
 - Parser: given a filename, returns a Cube
 
-- Executor: given a execution space and a state, runs the execution loop
-    - State (ref)
-    - Cube (ref)
+- executor: given a execution space and a state, runs the execution loop
+    - state
+    - space
+
+This should allow multiple executors (threads), see below.
 
 **Threading ideas**
 
-An Executor manages the execution loop (does the interpreting), and has:  
-- Pointer to a State
-- Pointer to a Cube (the execution space)
+An executor manages the execution loop (does the interpreting), and has:  
+- pointer to a state
+- pointer to a cube (the execution space)
 
-Eventually, Executors can be threaded, so that an instruction causes an Executor to spawn another Executor, copying State (should stack be duplicated? not sure), changing the InstructionVector and using the same Cube reference. Another instruction will cause the Executor to terminate. By spinning on memory locations, Executors can be synchronized.
+Eventually, executors can be threaded, so that an instruction causes an executor to spawn another executor, copying state (probably duplicated the stack, but maybe not?), changing the instruction_vector (so the thread goes off in a new direction) and using the same space reference. Another instruction will cause the executor to terminate. By spinning on memory locations, executors can be synchronized. There could also be an instruction for explictly blocking/synchronizing executors.
 
 ### References
 
