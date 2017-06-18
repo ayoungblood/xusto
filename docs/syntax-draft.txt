@@ -2,6 +2,27 @@ UNASSIGNED:
 natural: push e (2.71828...)
 gate: peek a, do not advance iptr until next cell is equal to a
 sync: not sure how to implement this, but a way to synchronize two threads would be cool
+set x: pop a; set iv.x = a
+set y: pop a; set iv.y = a
+set z: pop a; set iv.z = a
+kilo: pop a, push a * 10^3
+giga: pop a, push a * 10^12
+micro: pop a, push a * 10^-3
+nano: pop a, push a * 10^-9
+mega: pop a, push a * 10^6
+bounce: set iv = (-x,-y,-z)
+warp: set warp
+swap: pop a, b; push a, b
+greater: pop a, b; push a > b
+lesser: pop a, b; push a < b
+get: pop x, y, z, push space(x,y,z)
+set: pop x, y, z, v, set space(x,y,z) = v
+branch right/left
+branch in/out
+branch up/down
+duplicate: peek a; push a
+pop a,b; push a * 10^b
+equality: pop a, b; push a==b
 
 UNASSIGNED FLOAT:
 float add
@@ -25,135 +46,135 @@ float sinh/cosh/tanh
 float push infinity
 
 ## U+0000 - U+001F: Control codes (Parser instructions)
-U+0000 - NUL, Does nothing
-U+0001 - SOH, <reserved>
-U+0002 - STX, <reserved>
-U+0003 - ETX, (^C) @TODO Stop parsing and exit immediately
-U+0004 - EOT, (^D) @TODO Stop parsing (EOF)
-U+0005 - ENQ, <reserved>
-U+0006 - ACK, <reserved>
-U+0007 - BEL, Whack the parser, causing it to say "OUCH"
-U+0008 - BS,  Move write pointer one position leftwards (-x)
-U+0009 - HT,  Move write pointer four positions rightwards (+x)
-U+000A - LF,  Move write pointer one position downwards and reset left/right (+y, ±x)
-U+000B - VT,  Move write pointer one position downwards (+y)
-U+000C - FF,  Move write pointer one position into (+z)
-U+000D - CR,  Reset the write pointer left/right (±x)
-U+000E - SO,  <reserved>
-U+000F - SI,  <reserved>
-U+0010 - DLE, <reserved>
-U+0011 - DC1, <reserved> (XON)
-U+0012 - DC2, <reserved>
-U+0013 - DC3, <reserved> (XOFF)
-U+0014 - DC4, <reserved>
-U+0015 - NAK, <reserved>
-U+0016 - SYN, <reserved>
-U+0017 - ETB, <reserved>
-U+0018 - CAN, @TODO Stop parsing and dump (do not execute)
-U+0019 - EM,  @TODO Stop parsing (EOF)
-U+001A - SUB, <reserved>
-U+001B - ESC, <reserved>
-U+001C - FS,  <reserved>
-U+001D - GS,  <reserved>
-U+001E - RS,  <reserved>
-U+001F - US,  <reserved>
+U+0000 - NUL,   Does nothing
+U+0001 - SOH,   <reserved>
+U+0002 - STX,   <reserved>
+U+0003 - ETX,   (^C) @TODO Stop parsing and exit immediately
+U+0004 - EOT,   (^D) @TODO Stop parsing (EOF)
+U+0005 - ENQ,   <reserved>
+U+0006 - ACK,   <reserved>
+U+0007 - BEL,   Whack the parser, causing it to say "OUCH"
+U+0008 - BS,    Move write pointer one position leftwards (-x)
+U+0009 - HT,    Move write pointer four positions rightwards (+x)
+U+000A - LF,    Move write pointer one position downwards and reset left/right (+y, ±x)
+U+000B - VT,    Move write pointer one position downwards (+y)
+U+000C - FF,    Move write pointer one position into (+z)
+U+000D - CR,    Reset the write pointer left/right (±x)
+U+000E - SO,    <reserved>
+U+000F - SI,    <reserved>
+U+0010 - DLE,   <reserved>
+U+0011 - DC1,   <reserved> (XON)
+U+0012 - DC2,   <reserved>
+U+0013 - DC3,   <reserved> (XOFF)
+U+0014 - DC4,   <reserved>
+U+0015 - NAK,   <reserved>
+U+0016 - SYN,   <reserved>
+U+0017 - ETB,   <reserved>
+U+0018 - CAN,   @TODO Stop parsing and dump (do not execute)
+U+0019 - EM,    @TODO Stop parsing (EOF)
+U+001A - SUB,   <reserved>
+U+001B - ESC,   <reserved>
+U+001C - FS,    <reserved>
+U+001D - GS,    <reserved>
+U+001E - RS,    <reserved>
+U+001F - US,    <reserved>
 
 ## U+0020 - U+007E: Basic Latin (Core instructions)
 U+0020 - SPACE, no-op
-U+0021 - !, logical not
-U+0022 - ", toggle PUSHCHAR mode
-U+0023 - #, store iptr (drop portal)
+U+0021 - !,     logical NOT: pop a; push 1 if a == 0, 0 otherwise
+U+0022 - ",     PUSHCHAR: toggle PUSHCHAR mode
+U+0023 - #,     drop portal: store ip to portal register
 U+0024 - $,
-U+0025 - %, pop a, b; push b%a
-U+0026 - &, bitwise AND
-U+0027 - ', lazy print (pop and print until 0)
+U+0025 - %,     modulo: pop a, b; push b%a
+U+0026 - &,     bitwise AND: pop a, b; push (a AND b)
+U+0027 - ',     lazy print: pop a; print as a character; loop until a == 0
 U+0028 - (,
 U+0029 - ),
-U+002A - *, multiply
-U+002B - +, add
+U+002A - *,     multiply: pop a, b; push (a * b)
+U+002B - +,     add: pop a, b; push (a + b)
 U+002C - ,,
-U+002D - -, subtract
-U+002E - ., toward: set ivec to [0,0,-1]
-U+002F - /, divide
-U+0030 - 0, push 0x00
-U+0031 - 1, push 0x01
-U+0032 - 2, push 0x02
-U+0033 - 3, push 0x03
-U+0034 - 4, push 0x04
-U+0035 - 5, push 0x05
-U+0036 - 6, push 0x06
-U+0037 - 7, push 0x07
-U+0038 - 8, push 0x08
-U+0039 - 9, push 0x09
+U+002D - -,     subtract: pop a, b; push (a - b)
+U+002E - .,     out: set iv = (0,0,-1)
+U+002F - /,     divide: pop a, b; push (a / b)
+U+0030 - 0,     push 0x00
+U+0031 - 1,     push 0x01
+U+0032 - 2,     push 0x02
+U+0033 - 3,     push 0x03
+U+0034 - 4,     push 0x04
+U+0035 - 5,     push 0x05
+U+0036 - 6,     push 0x06
+U+0037 - 7,     push 0x07
+U+0038 - 8,     push 0x08
+U+0039 - 9,     push 0x09
 U+003A - :,
 U+003B - ;,
-U+003C - <, set ivec to [-1,0,0]
-U+003D - =, equality: pop a, b; push a==b
-U+003E - >, set ivec to [1,0,0]
+U+003C - <,     left: set iv = (-1,0,0)
+U+003D - =,
+U+003E - >,     right: set iv = (1,0,0)
 U+003F - ?,
-U+0040 - @, restore iptr (use portal)
+U+0040 - @,     use portal: restore portal register to ip
 U+0041 - A,
-U+0042 - B, bounce: set ivec to [-x,-y,-z]
+U+0042 - B,
 U+0043 - C,
-U+0044 - D, duplicate: peek a; push a
-U+0045 - E, pop a,b; push a * 10^b
+U+0044 - D,
+U+0045 - E,
 U+0046 - F,
-U+0047 - G, giga: pop a, push a * 10^12
-U+0048 - H, (formerly HALT)
+U+0047 - G,
+U+0048 - H,
 U+0049 - I,
 U+004A - J,
-U+004B - K, branch up/down
+U+004B - K,
 U+004C - L,
-U+004D - M, mega: pop a, push a * 10^6
+U+004D - M,
 U+004E - N,
-U+004F - O, branch in/out
-U+0050 - P, (formerly pop a)
-U+0051 - Q, (formerly 50% chance of teleport)
+U+004F - O,
+U+0050 - P,
+U+0051 - Q,
 U+0052 - R,
 U+0053 - S,
-U+0054 - T, branch right/left
+U+0054 - T,
 U+0055 - U,
 U+0056 - V,
 U+0057 - W,
 U+0058 - X,
 U+0059 - Y,
 U+005A - Z,
-U+005B - [, pop i, print i as integer
-U+005C - \, pop a, b; push a, b (swap)
-U+005D - ], pop c, print c as ASCII character
-U+005E - ^, set ivec to [0,1,0]
-U+005F - _, trampoline: increment iptr by ivec
-U+0060 - `, (formerly warp)
-U+0061 - a, push 0x0a
-U+0062 - b, push 0x0b
-U+0063 - c, push 0x0c
-U+0064 - d, push 0x0d
-U+0065 - e, push 0x0e
-U+0066 - f, push 0x0f
-U+0067 - g, greater: pop a,b; push a > b
-U+0068 - h, halt: orderly halt
+U+005B - [,     print integer: pop i; print i as an integer
+U+005C - \,
+U+005D - ],     print char: pop c; print c as a character
+U+005E - ^,     up: set iv = (0,1,0)
+U+005F - _,     trampoline: advance ip twice (skipping next instruction)
+U+0060 - `,
+U+0061 - a,     push 0x0a
+U+0062 - b,     push 0x0b
+U+0063 - c,     push 0x0c
+U+0064 - d,     push 0x0d
+U+0065 - e,     push 0x0e
+U+0066 - f,     push 0x0f
+U+0067 - g,
+U+0068 - h,     halt: halt program execution and exit
 U+0069 - i,
-U+006A - j,
-U+006B - k, kilo: pop a, push a * 10^3
-U+006C - l, lesser: pop a,b; push a < b
-U+006D - m, micro: pop a, push a * 10^-3
-U+006E - n, nano: pop a, push a * 10^-9
-U+006F - o, away: set ivec [0,0,1]
-U+0070 - p, pop: pop a; discard a
+U+006A - j,     bitwise XOR: pop a, b; push (a XOR b)
+U+006B - k,
+U+006C - l,
+U+006D - m,
+U+006E - n,
+U+006F - o,     into: set iv = (0,0,1)
+U+0070 - p,     pop: pop a; discard a
 U+0071 - q,
-U+0072 - r, retrieve: pop x, y, z, push space[x,y,z]
-U+0073 - s, set: pop x, y, z, v, set space[x,y,z] = v
+U+0072 - r,
+U+0073 - s,
 U+0074 - t,
 U+0075 - u,
-U+0076 - v, down: set ivec to [0,-1,0]
+U+0076 - v,     down: set iv = (0,-1,0)
 U+0077 - w,
-U+0078 - x, set ivec.x
-U+0079 - y, set ivec.y
-U+007A - z, set ivec.z
-U+007B - {, peek i, print i as integer
-U+007C - |, bitwise OR
-U+007D - }, peek c, print c
-U+007E - ~: bitwise NOT
+U+0078 - x,
+U+0079 - y,
+U+007A - z,
+U+007B - {,     peek print integer: peek i; print i as an integer
+U+007C - |,     bitwise OR: pop a, b; push (a OR b)
+U+007D - },     peek print char: peek c; print c as a character
+U+007E - ~,     bitwise NOT: pop a; push (NOT a)
 
 ## U+007F - U+009F: Control codes (Reserved)
 ...
