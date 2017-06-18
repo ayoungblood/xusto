@@ -82,7 +82,7 @@ $(TARGET): $(OBJECTS)
 all: $(TARGET)
 
 run: $(TARGET)
-		./$(TARGET) u.3
+		./$(TARGET) -v sandbox/test-files/u.3
 
 # Build, run, and clean unit tests
 test: $(OBJECTS) all
