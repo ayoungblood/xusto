@@ -9,6 +9,7 @@ extern flags_t flags;
 
 int main(int argc, char **argv) {
     int i;
+    space_t *space = NULL;
     /* List of source files that will be set by the arguments wrapper */
     fp_list_t source_fp_list;
     source_fp_list.length = 0;
@@ -17,39 +18,46 @@ int main(int argc, char **argv) {
     if (rv != 0) return (rv == -1)?RETURN_OK:rv;
     /* Loop through source file list and execute files */
     for (i = 0; i < source_fp_list.length; ++i) {
-        printf("Parsing %s\n", source_fp_list.filenames[i]);
-        rv = parse(source_fp_list.files[i], source_fp_list.filenames[i]);
-        if (rv != 0) return rv;
-        // Close the file. If the fp is NULL, something bad happened
-        if (source_fp_list.files[i]) {
-            printf("Closing %s\n", source_fp_list.filenames[i]);
-            fclose(source_fp_list.files[i]);
-        } else {
-            printf("Possible badness with %s, continuing...\n",
-                source_fp_list.filenames[i]);
+        // Create a space
+        // @TODO space initialization values should probably be smarter
+        space = space_create(vector3(0x100,0x100,0x4),1<<12);
+        if (!space) {
+            eprintf("Failed to create program space for %s\n", source_fp_list.filenames[i]);
+            return RETURN_INIT_FAIL;
         }
+        // Parse the file
+        bprintf(1,"Parsing %s\n", source_fp_list.filenames[i]);
+        rv = parse(source_fp_list.files[i], source_fp_list.filenames[i], space);
+        if (rv != 0) return rv;
+        // Execute the file
+
+        // Close the file
+        bprintf(1,"Closing %s\n", source_fp_list.filenames[i]);
+        fclose(source_fp_list.files[i]);
+        // Clean up
+        space_destroy(space);
     }
     fp_list_cleanup(&source_fp_list);
     return RETURN_OK;
 }
 
-int parse(FILE *fp, char *filename) {
-    // temporary stuff
-    space_t space;
-    vector3_t wp = {0,0,0};
-    // end
-
+int parse(FILE *fp, char *filename, space_t *space) {
     long file_length = 0;
     size_t bytes_read = 0, rv = 0;
     unsigned char b = 0, b1 = 0, b2 = 0, b3 = 0; // bytes from the file
     uint32_t v; // assembled value
+    // Cell and write pointer for writing to space
+    cell_t cell;
+    vector3_t wp = {0,0,0};
     /* Sanity check the file pointer */
     if (fp == NULL) eprintf("Error parsing %s\n", filename);
     /* Get the length of the file (in bytes) */
     fseek(fp, 0, SEEK_END);
     file_length = ftell(fp);
     rewind(fp);
-    eprintf("%s is %ld bytes long\n", filename, file_length);
+    bprintf(2,"%s is %ld bytes long\n", filename, file_length);
+    // Create a space
+    space = space_create(vector3(0x100,0x100,0x8), 1<<12);
     /* Iterate through the file, byte-by-byte */
     while (bytes_read < (unsigned long)file_length) {
         // Check that we can actually read bytes, so if we are reading from
@@ -60,7 +68,7 @@ int parse(FILE *fp, char *filename) {
         if (rv != 1) break;
         bytes_read += rv;
         /* Stone-age UTF-8 parsing: check the first byte and read more as necessary */
-        if (~b & 0x80) { // If the first bit is clear, single byte codepoint
+        if (~b & 0x80) { // If the MSB is clear, single byte codepoint
             // 7-bit code point (1 byte, U+0000 - U+007F)
             // Byte 0: 0b0xxxxxxx
             v = b & 0177;
@@ -99,9 +107,8 @@ int parse(FILE *fp, char *filename) {
                 v = b;
             }
         }
-        // printf("v: 0x%06x\n", v);
         if (v <= 0x1f) { // character is a parser instruction, execute it
-            printf("parser instruction: 0x%02x\n", v);
+            //printf("parser instruction: 0x%02x\n", v);
             switch (v) {
                 case 0x00: // NUL (^@) Null
                     // do absolutely nothing
@@ -157,20 +164,14 @@ int parse(FILE *fp, char *filename) {
                     return 1; // @TODO FIXME
             }
         } else { // character is a regular instruction, store it and advance the parser pointer
-            printf("regular instruction: 0x%06x\n", v);
-            //space.block[wp.z][wp.y][wp.x].i = v;
+            //printf("regular instruction: 0x%06x\n", v);
+            cell.i = v;
+            space_set(space, wp, cell);
             ++wp.x;
         }
-        printf("wp = (%lld,%lld,%lld)\n",(long long)wp.x,(long long)wp.y,(long long)wp.z);
+        //printf("wp = (%lld,%lld,%lld)\n",(long long)wp.x,(long long)wp.y,(long long)wp.z);
     }
-    printf("start dump\n");
-    for (int i = 0; i < 12; ++i) {
-        for (int j = 0; j < 12; ++j) {
-            //printf("%04llx ", (long long)space.block[0][i][j].i);
-        }
-        //printf("\n");
-    }
-    printf("end dump\n");
+    space_print(space,vector3(0,0,0),vector3(12,12,0), 0);
     return 0;
 }
 
@@ -204,13 +205,13 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
         static struct option long_options[] = {
             /* Simulator options */
             {"color",           required_argument,  0, 'c'}, // (disabled,auto,force)
-            {"debug",           optional_argument,  0, 'd'}, // level
+            {"debug",           no_argument,        0, 'd'},
             {"help",            no_argument,        0, 'h'},
             {"version",         no_argument,        0, 'V'},
-            {"verbose",         no_argument,        0, 'v'},
+            {"verbose",         optional_argument,  0, 'v'}, // level
             {0, 0, 0, 0}
         };
-        c = getopt_long (argc, argv, "c:d::hVv",long_options, &option_index);
+        c = getopt_long (argc, argv, "c:dhVv::",long_options, &option_index);
         if (c == -1) break; // Detect the end of the options.
 
         switch (c) {
@@ -227,18 +228,7 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                 }
                 break;
             case 'd': // --debug
-                *f |= MASK_DEBUG; // debug flag is set regardless of level
-                if (optarg != NULL) {
-                    if (!strcmp(optarg,"d") || !strcmp(optarg,"1")) {
-                        *f |= (1 & STATE_F_DEBUGLEVELMASK) << STATE_F_DEBUGLEVELSTART;
-                    } else if (!strcmp(optarg,"dd") || !strcmp(optarg,"2")) {
-                        *f |= (2 & STATE_F_DEBUGLEVELMASK) << STATE_F_DEBUGLEVELSTART;
-                    } else if (!strcmp(optarg,"ddd") || !strcmp(optarg,"3")) {
-                        *f |= (3 & STATE_F_DEBUGLEVELMASK) << STATE_F_DEBUGLEVELSTART;
-                    } else {
-                        printf("Invalid debug option argument: %s\n", optarg);
-                    }
-                }
+                *f |= MASK_DEBUG;
                 break;
             case 'h': // --help
                 printf( "Usage: %s [option]... [file ...]\n"
@@ -267,7 +257,17 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                     TARGET_STRING,VERSION_STRING);
                 return -1; // caller should exit without errors
             case 'v': // --verbose
-                *f |= MASK_VERBOSE;
+                if (optarg != NULL) {
+                    if (!strcmp(optarg,"v") || !strcmp(optarg,"2")) {
+                        *f |= (2<<SHIFT_VERBOSE);
+                    } else if (!strcmp(optarg,"vv") || !strcmp(optarg,"3")) {
+                        *f |= (3<<SHIFT_VERBOSE);
+                    } else {
+                        eprintf("Invalid verbosity level: %s\n", optarg);
+                    }
+                } else {
+                    *f |= (1<<SHIFT_VERBOSE);
+                }
                 break;
             case '?': // error
                 /* getopt_long already printed an error message. */
@@ -277,6 +277,7 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                 return RETURN_BAD_OPTS;
         }
     }
+    bprintf(2,"flags = 0x%08x\n", flags);
 
     /* Iterate through any remaining command line arguments (not options). */
     if (optind < argc) {

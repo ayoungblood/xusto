@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 
+#include "util.h"
 #include "types.h"
 
 typedef struct space_hashtable_entry_t {

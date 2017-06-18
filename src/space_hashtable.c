@@ -12,17 +12,17 @@ space_hashtable_t *space_hashtable_create(unsigned long long size) {
     space_hashtable_t *hashtable = NULL;
     unsigned long long i;
     if ((size == 0) || (size & (size - 1))) {
-        printf("%s: size (%llu) must be a power of two >= 1\n", __func__, size);
+        eprintf("%s: size (%llu) must be a power of two >= 1\n", __func__, size);
         return NULL;
     }
     // Allocate the table
     if ((hashtable = malloc(sizeof(space_hashtable_t))) == NULL) {
-        printf("%s: Failed to allocate hashtable\n", __func__);
+        eprintf("%s: Failed to allocate hashtable\n", __func__);
         return NULL;
     }
     // Allocate pointers to head nodes
     if ((hashtable->table = malloc(sizeof(space_hashtable_entry_t*)*size)) == NULL) {
-        printf("%s: Failed to allocate hashtable entries\n", __func__);
+        eprintf("%s: Failed to allocate hashtable entries\n", __func__);
         return NULL;
     }
     // Initialize pointers
@@ -98,7 +98,7 @@ void space_hashtable_set(space_hashtable_t *hashtable, vector3_t key, cell_t val
             /* Key doesn't exist, add a new key/value pair */
             new = space_hashtable_new(key, val);
             if (new == NULL) {
-                printf("%s: could not get new key/value pair\n",__func__);
+                eprintf("%s: could not get new key/value pair\n",__func__);
                 return;
             }
             if (next == NULL) {

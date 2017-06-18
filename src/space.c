@@ -9,7 +9,7 @@ space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
     space_t *space = NULL;
     xint_t k, j, i;
     if ((block_size.x <= 0) || (block_size.y <= 0) || (block_size.z <= 0)) {
-        printf("All components of block_size must be positive\n");
+        eprintf("All components of block_size must be positive\n");
         return NULL;
     }
     // Allocate the space
@@ -32,7 +32,7 @@ space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
     space->block_offset = vector3(0,0,0);
     // Allocate the space_hashtable
     if ((space->hash = space_hashtable_create(hash_size)) == NULL) {
-        printf("Failed to create space_hashtable\n");
+        eprintf("Failed to create space_hashtable\n");
         return NULL;
     }
     return space;
@@ -49,6 +49,7 @@ void space_destroy(space_t *space) {
     }
     free(space->block);
     free(space);
+    space = NULL;
 }
 /* Set a cell in the space */
 void space_set(space_t *space, vector3_t index, cell_t val) {
@@ -75,4 +76,29 @@ cell_t space_get(space_t *space, vector3_t index) {
         cell = space_hashtable_get(space->hash, index);
     }
     return cell;
+}
+/* Print a section of the space (prints to stderr) */
+void space_print(space_t *space, vector3_t start, vector3_t end, int borders) {
+    xint_t k, j, i;
+    cell_t cell;
+    for (k = start.z; k <= end.z; ++k) {
+        eprintf("(%lld:%lld,%lld:%lld,%lld):\n",
+            (uint64_t)start.x,(uint64_t)end.x,
+            (uint64_t)start.y,(uint64_t)end.y,(uint64_t)k);
+        if (borders) {
+            eprintf("       ");
+            for (i = start.x; i <= end.x; ++i) eprintf("%4llx ", (int64_t)i);
+            eprintf("\n       ");
+            for (i = start.x; i <= end.x; ++i) eprintf("---- ");
+            eprintf("\n");
+        }
+        for (j = start.y; j <= end.y; ++j) {
+            if (borders) eprintf("%4llx | ", (int64_t)j);
+            for (i = start.x; i <= end.x; ++i) {
+                cell = space_get(space, vector3(i,j,k));
+                eprintf("%04llx ", (int64_t)cell.i);
+            }
+            eprintf("\n");
+        }
+    }
 }
