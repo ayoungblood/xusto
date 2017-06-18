@@ -4,6 +4,16 @@
 
 #include "types.h"
 
+/* Clean up a list of file pointers */
+void fp_list_cleanup(fp_list_t *fp_list) {
+    if (fp_list->files) {
+        free(fp_list->files);
+    }
+    if (fp_list->filepaths) {
+        free(fp_list->filepaths);
+    }
+}
+
 /* Syntactic sugar for creating and setting a vector3 */
 vector3_t vector3(xint_t x, xint_t y, xint_t z) {
     vector3_t rv;

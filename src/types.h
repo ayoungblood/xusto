@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <float.h>
+#include <stdlib.h>
 
 // General signed integer type
 typedef int_fast64_t xint_t;
@@ -47,7 +48,10 @@ typedef uint32_t flags_t;
 typedef struct fp_list_t {
     int length;
     FILE **files;
-    char **filenames;
+    char **filepaths;
 } fp_list_t;
+
+/* Clean up a list of file pointers */
+void fp_list_cleanup(fp_list_t *fp_list);
 
 #endif /* _TYPES_H */

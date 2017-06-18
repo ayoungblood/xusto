@@ -22,17 +22,18 @@ int main(int argc, char **argv) {
         // @TODO space initialization values should probably be smarter
         space = space_create(vector3(0x100,0x100,0x4),1<<12);
         if (!space) {
-            eprintf("Failed to create program space for %s\n", source_fp_list.filenames[i]);
+            eprintf("Failed to create program space for %s\n", source_fp_list.filepaths[i]);
             return RETURN_INIT_FAIL;
         }
         // Parse the file
-        bprintf(1,"Parsing %s\n", source_fp_list.filenames[i]);
-        rv = parse(source_fp_list.files[i], source_fp_list.filenames[i], space);
+        bprintf(1,"Parsing %s\n", source_fp_list.filepaths[i]);
+        rv = parse(source_fp_list.files[i], source_fp_list.filepaths[i], space);
         if (rv != 0) return rv;
         // Execute the file
-
+        rv = execute(space);
+        if (rv != 0) return rv;
         // Close the file
-        bprintf(1,"Closing %s\n", source_fp_list.filenames[i]);
+        bprintf(1,"Closing %s\n", source_fp_list.filepaths[i]);
         fclose(source_fp_list.files[i]);
         // Clean up
         space_destroy(space);
@@ -41,7 +42,32 @@ int main(int argc, char **argv) {
     return RETURN_OK;
 }
 
-int parse(FILE *fp, char *filename, space_t *space) {
+int execute(space_t *space) {
+    // Instruction pointer and instruction vector
+    vector3_t ip, iv;
+    // Current instruction
+    cell_t instr;
+    // Initialize instruction vector and instruction pointer
+    ip = vector3(0,0,0);
+    iv = vector3(1,0,0);
+    space_print(space,vector3(0,0,0),vector3(12,12,0), 0);
+    // Start executing
+    /*
+    while (1) {
+        // Get the current instruction
+        instr = space_get(space, ip);
+        // Execute the current instruction
+        switch (instr.i) {
+
+        }
+        // Advance the instruction pointer
+        ip = vector3_addv(ip, iv);
+    }*/
+
+    return 0;
+}
+
+int parse(FILE *fp, char *filepath, space_t *space) {
     long file_length = 0;
     size_t bytes_read = 0, rv = 0;
     unsigned char b = 0, b1 = 0, b2 = 0, b3 = 0; // bytes from the file
@@ -50,14 +76,12 @@ int parse(FILE *fp, char *filename, space_t *space) {
     cell_t cell;
     vector3_t wp = {0,0,0};
     /* Sanity check the file pointer */
-    if (fp == NULL) eprintf("Error parsing %s\n", filename);
+    if (fp == NULL) eprintf("Error parsing %s\n", filepath);
     /* Get the length of the file (in bytes) */
     fseek(fp, 0, SEEK_END);
     file_length = ftell(fp);
     rewind(fp);
-    bprintf(2,"%s is %ld bytes long\n", filename, file_length);
-    // Create a space
-    space = space_create(vector3(0x100,0x100,0x8), 1<<12);
+    bprintf(2,"%s is %ld bytes long\n", filepath, file_length);
     /* Iterate through the file, byte-by-byte */
     while (bytes_read < (unsigned long)file_length) {
         // Check that we can actually read bytes, so if we are reading from
@@ -103,7 +127,7 @@ int parse(FILE *fp, char *filename, space_t *space) {
                 // We intentionally expose a UTF-8 parser vulnerability and
                 // take the byte verbatim, but also print a warning
                 cprintf(ANSI_C_YELLOW, "Warning: Possible corruption in %s@b%zu: 0x%02x\n",
-                    filename, bytes_read, b);
+                    filepath, bytes_read, b);
                 v = b;
             }
         }
@@ -122,7 +146,7 @@ int parse(FILE *fp, char *filename, space_t *space) {
                 case 0x07: // BEL (^G) Bell
                     // Whack the parser, causing it to say "OUCH"
                     if (flags & MASK_VERBOSE) {
-                        cprintf(ANSI_C_YELLOW, "OUCH (%s@b%zu)\n", filename, bytes_read);
+                        cprintf(ANSI_C_YELLOW, "OUCH (%s@b%zu)\n", filepath, bytes_read);
                     } else {
                         cprintf(ANSI_C_YELLOW, "OUCH\n");
                     }
@@ -160,18 +184,15 @@ int parse(FILE *fp, char *filename, space_t *space) {
                     break;
                 default: // Reserved/unimplemented/non-existent parser instruction
                     cprintf(ANSI_C_RED, "Reserved parser instruction in %s@b%zu: 0x%02x. Exiting.\n",
-                        filename, bytes_read, v);
+                        filepath, bytes_read, v);
                     return 1; // @TODO FIXME
             }
         } else { // character is a regular instruction, store it and advance the parser pointer
-            //printf("regular instruction: 0x%06x\n", v);
             cell.i = v;
             space_set(space, wp, cell);
             ++wp.x;
         }
-        //printf("wp = (%lld,%lld,%lld)\n",(long long)wp.x,(long long)wp.y,(long long)wp.z);
     }
-    space_print(space,vector3(0,0,0),vector3(12,12,0), 0);
     return 0;
 }
 
@@ -284,14 +305,14 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
         // Get the number of (potential) files we have and allocate
         fp_list->length = argc-optind;
         fp_list->files = (FILE**)malloc(sizeof(FILE*)*(size_t)(fp_list->length));
-        fp_list->filenames = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
+        fp_list->filepaths = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
         // For each file, try to open it
         for (i = 0; i < fp_list->length; ++i) {
             fp_list->files[i] = fopen(argv[optind + i],"r");
-            fp_list->filenames[i] = argv[optind + i];
+            fp_list->filepaths[i] = argv[optind + i];
             if (!fp_list->files[i]) {
                 cprintf(ANSI_C_RED,"You lied to me when you told me this was a file: %s\n",
-                    fp_list->filenames[i]);
+                    fp_list->filepaths[i]);
                 return RETURN_BAD_ARGS; // exit with error
             }
         }
@@ -299,52 +320,11 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
         // We are reading from stdin
         fp_list->length = 1;
         fp_list->files = (FILE**)malloc(sizeof(FILE*)*(size_t)(fp_list->length));
-        fp_list->filenames = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
+        fp_list->filepaths = (char**)malloc(sizeof(char*)*(size_t)(fp_list->length));
         fp_list->files[0] = stdin;
-        fp_list->filenames[0] = malloc(6*sizeof(char));
-        strncpy(fp_list->filenames[0], "stdin", 6);
+        fp_list->filepaths[0] = malloc(6*sizeof(char));
+        strncpy(fp_list->filepaths[0], "stdin", 6);
     }
     // If we reach here, we have succesfully opened all the files
     return RETURN_OK; // everything is OK
 }
-
-/*
-void message(const char *msg, int code, char *extra) {
-    const char *type;
-    const char *color;
-    switch (code >> 8) {
-        case 0: // SHOULD NOT HAPPEN
-        color = ANSI_C_MAGENTA;
-        type = MSG_TYP_CATASTROPHIC;
-        break;
-        case 1: // ERROR
-        color = ANSI_C_RED;
-        type = MSG_TYP_ERROR;
-        break;
-        case 2: // WARNING
-        color = ANSI_C_YELLOW;
-        type = MSG_TYP_WARNING;
-        break;
-        case 3: // INFO (not used)
-        color = ANSI_C_GREEN;
-        type = MSG_TYP_INFO;
-        break;
-        case 4: // DEBUG
-        color = ANSI_C_GREEN;
-        type = MSG_TYP_DEBUG;
-        break;
-        default: // should not be reached
-        printf(ANSI_C_MAGENTA STR_BADERROR "\n" ANSI_C_RESET);
-        return;
-    }
-    const char *ex = extra;
-    if (!extra)
-    ex = "";
-    if (flags & STATE_F_DEBUG) {
-        printf("%s%s 0x%04x: %s%s\n" ANSI_C_RESET, color, type, code, msg, ex);
-    } else {
-        printf("%s%s%s\n" ANSI_C_RESET, color, msg, ex);
-    }
-    return;
-}
-*/

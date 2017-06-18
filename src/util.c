@@ -21,12 +21,3 @@ void cprintf(const char *color, const char *format, ...) {
     va_end(args);
 #pragma GCC diagnostic pop
 }
-
-void fp_list_cleanup(fp_list_t *fp_list) {
-    if (fp_list->files) {
-        free(fp_list->files);
-    }
-    if (fp_list->filenames) {
-        free(fp_list->filenames);
-    }
-}
