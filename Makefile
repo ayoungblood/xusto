@@ -98,6 +98,10 @@ test: $(OBJECTS) all
 		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o src/space_hashtable.o src/space.o $(LIBS) -o unit-test/space-test unit-test/space-test.c
 		unit-test/space-test
 		-@$(RM) unit-test/space-test
+		# stack tests
+		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o src/xstack.o $(LIBS) -o unit-test/stack-test unit-test/stack-test.c
+		unit-test/stack-test
+		-@$(RM) unit-test/stack-test
 		@# clean up
 		-@$(RM) -r unit-test/*.dSYM
 
