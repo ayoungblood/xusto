@@ -43,27 +43,215 @@ int main(int argc, char **argv) {
 }
 
 int execute(space_t *space) {
+    int rv;
+    // Interpreter state
+    state_t state = STATE_F_EXECUTE;
+    // Stack
+    xstack_t *stack;
     // Instruction pointer and instruction vector
     vector3_t ip, iv;
     // Current instruction
     cell_t instr;
+    // Temporary cells for stack operations
+    cell_t a, b;
+    // Create stack
+    if ((stack = stack_create(1<<8)) == NULL) return RETURN_INIT_FAIL;
     // Initialize instruction vector and instruction pointer
     ip = vector3(0,0,0);
     iv = vector3(1,0,0);
-    space_print(space,vector3(0,0,0),vector3(12,12,0), 0);
+
+    //space_print(space,vector3(0,0,0),vector3(12,12,0), 0);
     // Start executing
-    /*
-    while (1) {
+    while (state & STATE_F_EXECUTE) {
         // Get the current instruction
         instr = space_get(space, ip);
+        // If PUSHCHAR set, push the instruction onto the stack (do not execute)
+        // and advance. The only character that exits PUSHCHAR is "
+        if (state & STATE_F_PUSHCHAR && instr.i != 0x0022) {
+            stack_push(stack,cell(instr.i));
+            ip = vector3_addv(ip, iv);
+            goto LOOP_END;
+        }
         // Execute the current instruction
         switch (instr.i) {
+        case 0x0020: // SPACE: no-op
+            break;
+        case 0x0021: // !: logical NOT
+            a = stack_pop(stack);
+            if (a.i) stack_push(stack,cell(0)); else stack_push(stack,cell(1));
+            break;
+        case 0x0022: // ": PUSHCHAR
+            state ^= STATE_F_PUSHCHAR;
+            break;
 
+        case 0x0025: // %: modulo
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i % b.i)); // @TODO b%a ?
+            break;
+        case 0x0026: // &: bitwise AND
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i & b.i));
+            break;
+        case 0x0027: // ': lazy print
+            do {
+                a = stack_pop(stack);
+                printf("%c",a.i); // @TODO fix this for Unicode characters
+            } while (a.i != 0);
+            break;
+
+        case 0x002A: // *: multiply
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i * b.i));
+            break;
+        case 0x002B: // +: add
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i + b.i));
+            break;
+
+        case 0x002D: // -: subtract
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i - b.i)); // @TODO b-a ?
+            break;
+        case 0x002E: // .: out
+            iv = vector3(0,0,-1);
+            break;
+        case 0x002F: // /: divide
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i / b.i)); // @TODO b/a ?
+            break;
+        case 0x0030: // 0: push 0x00
+            stack_push(stack,cell(0x00));
+            break;
+        case 0x0031: // 1: push 0x01
+            stack_push(stack,cell(0x01));
+            break;
+        case 0x0032: // 2: push 0x02
+            stack_push(stack,cell(0x02));
+            break;
+        case 0x0033: // 3: push 0x03
+            stack_push(stack,cell(0x03));
+            break;
+        case 0x0034: // 4: push 0x04
+            stack_push(stack,cell(0x04));
+            break;
+        case 0x0035: // 5: push 0x05
+            stack_push(stack,cell(0x05));
+            break;
+        case 0x0036: // 6: push 0x06
+            stack_push(stack,cell(0x06));
+            break;
+        case 0x0037: // 7: push 0x07
+            stack_push(stack,cell(0x07));
+            break;
+        case 0x0038: // 8: push 0x08
+            stack_push(stack,cell(0x08));
+            break;
+        case 0x0039: // 9: push 0x09
+            stack_push(stack,cell(0x09));
+            break;
+
+        case 0x003C: // <: left
+            iv = vector3(-1,0,0);
+            break;
+
+        case 0x003E: // >: right
+            iv = vector3(0,0,-1);
+            break;
+
+        case 0x005B: // [: print integer
+            a = stack_pop(stack);
+            printf("%lld",a.i);
+            break;
+
+        case 0x005D: // ]: print character
+            a = stack_pop(stack);
+            printf("%c",a.i); // @TODO fix this for Unicode characters
+            break;
+        case 0x005E: // ^: up
+            iv = vector3(0,1,0);
+            break;
+        case 0x005F: // _: trampoline
+            ip = vector3_addv(ip, iv);
+            break;
+
+        case 0x0061: // a: push 0x0a
+            stack_push(stack,cell(0x0a));
+            break;
+        case 0x0062: // b: push 0x0b
+            stack_push(stack,cell(0x0b));
+            break;
+        case 0x0063: // c: push 0x0c
+            stack_push(stack,cell(0x0c));
+            break;
+        case 0x0064: // d: push 0x0d
+            stack_push(stack,cell(0x0d));
+            break;
+        case 0x0065: // e: push 0x0e
+            stack_push(stack,cell(0x0e));
+            break;
+        case 0x0066: // f: push 0x0f
+            stack_push(stack,cell(0x0f));
+            break;
+
+        case 0x0068: // h: halt
+            // clear execute bit
+            state &= ~STATE_F_EXECUTE;
+            bprintf(1,"Halted execution at (%lld,%lld,%lld)\n",ip.x,ip.y,ip.z);
+            break;
+
+        case 0x006A: // j: bitwise XOR
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i ^ b.i));
+            break;
+
+        case 0x006F: // o: into
+            iv = vector3(0,0,1);
+            break;
+        case 0x0070: // p: pop
+            (void)stack_pop(stack);
+            break;
+
+        case 0x0076: // v: down
+            iv = vector3(0,-1,0);
+            break;
+
+        case 0x007B: // {: peek print integer
+            a = stack_peek(stack);
+            printf("%lld",a.i);
+            break;
+        case 0x007C: // |: bitwise OR
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,cell(a.i | b.i));
+            break;
+        case 0x007D: // }: peek print char
+            a = stack_peek(stack);
+            printf("%c",a.i); // @TODO fix this for Unicode characters
+            break;
+        case 0x007E: // ~: bitwise NOT
+            a = stack_peek(stack);
+            stack_push(stack,cell(~a.i));
+            break;
+        ///////////////////////////////////////////////////
+        case 0x0058: // @TODO temporary debug dump
+            stack_print(stack,8);
+            break;
+        default:
+            eprintf("Unimplemented instruction: %llx\n",instr.i);
         }
-        // Advance the instruction pointer
         ip = vector3_addv(ip, iv);
-    }*/
-
+LOOP_END: // instructions may jump here to skip the usual instruction pointer advancement
+        if (flags & MASK_INTERACTIVE) if ((rv = interactive()) != 0) return rv;
+    }
+    // Flush stdout @TODO should we disable buffering on stdout instead?
+    fflush(stdout);
     return 0;
 }
 
@@ -327,4 +515,8 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
     }
     // If we reach here, we have succesfully opened all the files
     return RETURN_OK; // everything is OK
+}
+
+int interactive(void) {
+    return 0;
 }

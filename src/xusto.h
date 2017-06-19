@@ -11,6 +11,7 @@
 #include "util.h"
 #include "types.h"
 #include "space.h"
+#include "xstack.h"
 
 #define LANG_EN
 #include "i18n.h"
@@ -44,3 +45,7 @@ int arguments(int argc, char **argv, flags_t *flags, fp_list_t *fp_list);
  * Returns >1 when the caller should return with errors,
  * return 0 otherwise */
 int parse(FILE *fp, char *filepath, space_t *space);
+
+/* Interactive debugger
+ * Stubbed for now */
+int interactive(void);

@@ -14,6 +14,11 @@ void fp_list_cleanup(fp_list_t *fp_list) {
     }
 }
 
+/* Syntactic sugar for creating a cell from an integer */
+cell_t cell(xint_t i) {
+    return (cell_t){.i = i};
+}
+
 /* Syntactic sugar for creating and setting a vector3 */
 vector3_t vector3(xint_t x, xint_t y, xint_t z) {
     vector3_t rv;

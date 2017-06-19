@@ -14,11 +14,14 @@
 typedef int_fast64_t xint_t;
 // General floating point type
 typedef double xfloat_t;
-// Union type for a cell
+
+/* Union type for a cell representing signed integer or float types */
 typedef union {
     xint_t i;
     xfloat_t f;
 } cell_t;
+/* Syntactic sugar for creating a cell from an integer */
+cell_t cell(xint_t i);
 
 /* 3-element vector type */
 typedef struct vector3_t {
@@ -43,6 +46,9 @@ vector3_t vector3_dive(const vector3_t a, const vector3_t b);
 
 // Flag type (used as a bit vector)
 typedef uint32_t flags_t;
+
+// State type (used as a bit vector)
+typedef uint64_t state_t;
 
 // FILE pointer list type
 typedef struct fp_list_t {

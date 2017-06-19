@@ -16,6 +16,7 @@
 #define MASK_VERBOSE        ((flags_t)3<<1) // Show verbose messages, level 0-3
 #define SHIFT_VERBOSE       ((flags_t)1)
 #define MASK_COLOR          ((flags_t)1<<3) // Colorized text output
+#define MASK_INTERACTIVE    ((flags_t)1<<4) // Interactive mode enable
 
 #define DEBUG               (flags & MASK_DEBUG)
 #define VERBOSITY           ((flags & MASK_VERBOSE)>>SHIFT_VERBOSE)
