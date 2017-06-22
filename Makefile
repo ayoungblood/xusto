@@ -48,7 +48,7 @@ LDFLAGS = -g -Wall -Wextra
 # LDFLAGS="-Wl,-z,now -Wl,-z,relro" ?
 LDLIBS =
 
-ifeq ($(CI),"TRUE")
+ifeq ($(CI),TRUE)
 		# Run coverage reports on CI builds
 		CI_CFLAGS = -fprofile-arcs -ftest-coverage
 		CI_LDFLAGS = --coverage
@@ -124,6 +124,7 @@ clean:
 		-$(RM) $(TARGET)
 
 info:
+		@echo "CI = $(CI)"
 		@echo "TARGET = $(TARGET)"
 		@echo "CFLAGS = $(CFLAGS)"
 		@echo "LDFLAGS = $(LDFLAGS)"
