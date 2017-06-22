@@ -17,9 +17,9 @@
 #include "i18n.h"
 
 // Interpreter state flag bits
-#define STATE_F_EXECUTE         (1<<0)
-#define STATE_F_PUSHCHAR        (1<<1)
-#define STATE_F_EXCEPTION       (1<<2)
+#define STATE_F_EXECUTE         ((state_t)1<<0)
+#define STATE_F_PUSHCHAR        ((state_t)1<<1)
+#define STATE_F_EXCEPTION       ((state_t)1<<2)
 
 /* Execute from a space
  * @space: a space to execute

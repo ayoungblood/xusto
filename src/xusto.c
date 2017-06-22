@@ -166,7 +166,7 @@ int execute(space_t *space) {
 
         case 0x005B: // [: print integer
             a = stack_pop(stack);
-            printf("%lld",a.i);
+            printf("%"XId"",a.i);
             break;
 
         case 0x005D: // ]: print character
@@ -202,7 +202,7 @@ int execute(space_t *space) {
         case 0x0068: // h: halt
             // clear execute bit
             state &= ~STATE_F_EXECUTE;
-            bprintf(1,"Halted execution at (%lld,%lld,%lld)\n",ip.x,ip.y,ip.z);
+            bprintf(1,"Halted execution at (%"XId",%"XId",%"XId")\n",ip.x,ip.y,ip.z);
             break;
 
         case 0x006A: // j: bitwise XOR
