@@ -1,11 +1,6 @@
 # Makefile
 TARGET = xusto
-# If we are on Travis, use CC as is, otherwise use gcc
-ifneq ($(CI),"TRUE")
-	CC = gcc
-endif
-#CC = gcc
-RM = rm -f
+
 # C compiler flags
 # (see https://stackoverflow.com/questions/3375697/useful-gcc-flags-for-c)
 CFLAGS=-g -std=c11 -Wall -Wextra -pedantic -O3 -Wshadow -Wpointer-arith \
@@ -53,6 +48,16 @@ LDFLAGS = -g -Wall -Wextra
 # LDFLAGS="-Wl,-z,now -Wl,-z,relro" ?
 LDLIBS =
 
+ifneq ($(CI),"TRUE")
+	# If this is a CI build, use CC as is, otherwise use gcc
+	CC = gcc
+	# Coverage reports on CI builds
+	CI_CFLAGS = -fprofile-arcs -ftest-coverage
+	CI_LDFLAGS = --coverage
+endif
+
+RM = rm -f
+
 SRCS=src/xusto.c
 OBJS=$(subst .c,.o,$(SRCS))
 
@@ -69,7 +74,7 @@ VERSION = $(shell git rev-parse --short HEAD)
 else
 VERSION = "0.0.0"
 endif
-
+# Pass the version string and target name as defines
 STRFLAGS = -D TARGET_STRING="\"$(TARGET)\"" -D VERSION_STRING="\"$(VERSION)\""
 
 # Silence a few warnings in unit tests
@@ -77,11 +82,11 @@ TESTFLAGS = -Wno-strict-prototypes -Wno-old-style-definition
 
 # Build all the object files
 %.o: %.c $(HEADERS)
-		$(CC) $(STRFLAGS) $(CFLAGS) -c $< -o $@
+		$(CC) $(STRFLAGS) $(CFLAGS) $(CI_CFLAGS) -c $< -o $@
 
 # Build the target
 $(TARGET): $(OBJECTS)
-		$(CC) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
+		$(CC) $(LDFLAGS) $(CI_LDFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
 
 all: $(TARGET)
 
@@ -91,19 +96,19 @@ run: $(TARGET)
 # Build, run, and clean unit tests
 test: $(OBJECTS) all
 		# vector3 tests
-		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o $(LIBS) -o unit-test/vector3-test unit-test/vector3-test.c
+		$(CC) $(CFLAGS) $(TESTFLAGS) $(CI_LDFLAGS) src/types.o $(LIBS) -o unit-test/vector3-test unit-test/vector3-test.c
 		unit-test/vector3-test
 		-@$(RM) unit-test/vector3-test
 		# space_hashtable tests
-		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o src/space_hashtable.o $(LIBS) -o unit-test/space_hashtable-test unit-test/space_hashtable-test.c
+		$(CC) $(CFLAGS) $(TESTFLAGS) $(CI_LDFLAGS) src/types.o src/space_hashtable.o $(LIBS) -o unit-test/space_hashtable-test unit-test/space_hashtable-test.c
 		unit-test/space_hashtable-test
 		-@$(RM) unit-test/space_hashtable-test
 		# space tests
-		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o src/space_hashtable.o src/space.o $(LIBS) -o unit-test/space-test unit-test/space-test.c
+		$(CC) $(CFLAGS) $(TESTFLAGS) $(CI_LDFLAGS) src/types.o src/space_hashtable.o src/space.o $(LIBS) -o unit-test/space-test unit-test/space-test.c
 		unit-test/space-test
 		-@$(RM) unit-test/space-test
 		# stack tests
-		$(CC) $(CFLAGS) $(TESTFLAGS) src/types.o src/xstack.o $(LIBS) -o unit-test/stack-test unit-test/stack-test.c
+		$(CC) $(CFLAGS) $(TESTFLAGS) $(CI_LDFLAGS) src/types.o src/xstack.o $(LIBS) -o unit-test/stack-test unit-test/stack-test.c
 		unit-test/stack-test
 		-@$(RM) unit-test/stack-test
 		@# clean up
@@ -114,4 +119,5 @@ clean:
 		-$(RM) -r *.dSYM
 		-$(RM) src/*.gch
 		-$(RM) src/*/*.gch
+		-$(RM) *.gcda *.gcno *.gcov src/*.gcno src/*.gcda
 		-$(RM) $(TARGET)

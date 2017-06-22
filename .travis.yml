@@ -9,15 +9,18 @@ language: c
 compiler:
     - gcc
     - clang
-#
+
 before_install:
 install:
 before_script:
 script:
-    #- rvm get stable # https://github.com/travis-ci/travis-ci/issues/6307
     - make
     - make test
     - make run
+    - gcov src/xusto.c
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
+
 #deploy:
 #  provider: releases
 #  skip_cleanup: true
