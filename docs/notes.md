@@ -95,6 +95,17 @@ Eventually, executors can be threaded, so that an instruction causes an executor
 [Wikipedia: ANSI escape code](https://en.wikipedia.org/wiki/ANSI_escape_code)  
 [Wikipedia: List of ISO 639-1 codes](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)  
 
+**C Development**
+
+[stdint.h](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/stdint.h.html)  
+[inttypes.h](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/inttypes.h.html)  
+[pthreads Tutorial](https://computing.llnl.gov/tutorials/pthreads/)  
+[pthread.h](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/pthread.h.html)  
+
+**Math**
+
+[NIST Digital Library of Mathematica Functions](http://dlmf.nist.gov/)  
+
 **Funges**
 
 [Funge-98 Final Specification](http://quadium.net/funge/spec98.html)  
@@ -119,6 +130,14 @@ Eventually, executors can be threaded, so that an instruction causes an executor
 [PicoBlaze Instruction Set](https://www.xilinx.com/support/documentation/ip_documentation/ug129.pdf)  
 [FALSE](https://esolangs.org/wiki/FALSE)  
 [Esolangs: Two-dimensional languages](https://esolangs.org/wiki/Category:Two-dimensional_languages)  
+[Forked](https://github.com/aaronryank/Forked)  
+[Triangular](https://github.com/aaronryank/triangular)  
+[SOGL](https://github.com/dzaima/SOGL), with [online interpreter](https://dzaima.github.io/SOGLOnline/)  
+[Charcoal](https://github.com/somebody1234/Charcoal), with [online interpreter](https://tio.run/#charcoal)  
+[MATL](https://github.com/lmendo/MATL)  
+[Bubblegum](https://esolangs.org/wiki/Bubblegum)  
+
+
 
 **Turing-Completeness**
 
