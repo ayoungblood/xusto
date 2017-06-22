@@ -3,8 +3,10 @@
 os:
     - linux
     - osx
+sudo:
+    - false
+    - required
 dist: trusty
-sudo: false
 language: c
 compiler:
     - gcc
