@@ -1,6 +1,10 @@
 # Makefile
 TARGET = xusto
-CC = gcc
+# If we are on Travis, use CC as is, otherwise use gcc
+ifneq ($(CI),"TRUE")
+	CC = gcc
+endif
+#CC = gcc
 RM = rm -f
 # C compiler flags
 # (see https://stackoverflow.com/questions/3375697/useful-gcc-flags-for-c)
