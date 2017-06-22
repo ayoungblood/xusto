@@ -1,5 +1,5 @@
-#branches:
-#    except:
+# .travis.yml
+
 os:
     - linux
     - osx
@@ -14,17 +14,13 @@ before_install:
 install:
 before_script:
 script:
+    - make info
     - make
     - make test
     - make run
-    - gcov src/xusto.c
 after_success:
     - bash <(curl -s https://codecov.io/bash)
+    - make clean
 
-#deploy:
-#  provider: releases
-#  skip_cleanup: true
-#  on:
-#    tags: true
 notifications:
     email: false

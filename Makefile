@@ -48,12 +48,13 @@ LDFLAGS = -g -Wall -Wextra
 # LDFLAGS="-Wl,-z,now -Wl,-z,relro" ?
 LDLIBS =
 
-ifneq ($(CI),"TRUE")
-	# If this is a CI build, use CC as is, otherwise use gcc
-	CC = gcc
-	# Coverage reports on CI builds
-	CI_CFLAGS = -fprofile-arcs -ftest-coverage
-	CI_LDFLAGS = --coverage
+ifeq ($(CI),"TRUE")
+		# Run coverage reports on CI builds
+		CI_CFLAGS = -fprofile-arcs -ftest-coverage
+		CI_LDFLAGS = --coverage
+else
+		# Use gcc when not on a CI build
+		CC = gcc
 endif
 
 RM = rm -f
@@ -61,7 +62,7 @@ RM = rm -f
 SRCS=src/xusto.c
 OBJS=$(subst .c,.o,$(SRCS))
 
-.PHONY: test clean run
+.PHONY: test clean run info
 
 # Get all the header files and object files
 HEADERS = $(wildcard src/*.h)
@@ -70,9 +71,9 @@ OBJECTS = $(patsubst %.c, %.o, $(wildcard src/*.c))
 # Set the version string from the git commit tag, unless we can't
 HAVE_GIT := $(shell command -v git 2>/dev/null)
 ifdef HAVE_GIT
-VERSION = $(shell git rev-parse --short HEAD)
+	VERSION = $(shell git rev-parse --short HEAD)
 else
-VERSION = "0.0.0"
+	VERSION = "0.0.0"
 endif
 # Pass the version string and target name as defines
 STRFLAGS = -D TARGET_STRING="\"$(TARGET)\"" -D VERSION_STRING="\"$(VERSION)\""
@@ -121,3 +122,14 @@ clean:
 		-$(RM) src/*/*.gch
 		-$(RM) *.gcda *.gcno *.gcov src/*.gcno src/*.gcda
 		-$(RM) $(TARGET)
+
+info:
+		@echo "TARGET = $(TARGET)"
+		@echo "CFLAGS = $(CFLAGS)"
+		@echo "LDFLAGS = $(LDFLAGS)"
+		@echo "TESTFLAGS = $(TESTFLAGS)"
+		@echo "CI_CFLAGS = $(CI_CFLAGS)"
+		@echo "CI_LDFLAGS = $(CI_LDFLAGS)"
+		@echo "STRFLAGS = $(STRFLAGS)"
+		@echo "$(CC) --version: "
+		@$(CC) --version
