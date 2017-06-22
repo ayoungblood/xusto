@@ -18,7 +18,7 @@ script:
     - make
     - make test
     - make run
-    - gcov xusto.c
+    - gcov src/xusto.c
 after_success:
     - bash <(curl -s https://codecov.io/bash)
     - make clean
