@@ -13,9 +13,10 @@ before_install:
 install:
 before_script:
 script:
-    - rvm get stable # https://github.com/travis-ci/travis-ci/issues/6307
+    #- rvm get stable # https://github.com/travis-ci/travis-ci/issues/6307
     - make
     - make test
+    - make run
 #deploy:
 #  provider: releases
 #  skip_cleanup: true
