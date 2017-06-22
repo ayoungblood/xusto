@@ -60,7 +60,7 @@ int execute(space_t *space) {
     ip = vector3(0,0,0);
     iv = vector3(1,0,0);
 
-    //space_print(space,vector3(0,0,0),vector3(12,12,0), 0);
+    //space_print(space,vector3(0,0,0),vector3(15,7,0), 0);
     // Start executing
     while (state & STATE_F_EXECUTE) {
         // Get the current instruction
@@ -97,7 +97,7 @@ int execute(space_t *space) {
         case 0x0027: // ': lazy print
             do {
                 a = stack_pop(stack);
-                printf("%c",a.i); // @TODO fix this for Unicode characters
+                print_utf8(a.i);
             } while (a.i != 0);
             break;
 
@@ -171,7 +171,7 @@ int execute(space_t *space) {
 
         case 0x005D: // ]: print character
             a = stack_pop(stack);
-            printf("%c",a.i); // @TODO fix this for Unicode characters
+            print_utf8(a.i);
             break;
         case 0x005E: // ^: up
             iv = vector3(0,1,0);
@@ -224,7 +224,7 @@ int execute(space_t *space) {
 
         case 0x007B: // {: peek print integer
             a = stack_peek(stack);
-            printf("%lld",a.i);
+            printf("%"XId"",a.i);
             break;
         case 0x007C: // |: bitwise OR
             a = stack_pop(stack);
@@ -233,7 +233,7 @@ int execute(space_t *space) {
             break;
         case 0x007D: // }: peek print char
             a = stack_peek(stack);
-            printf("%c",a.i); // @TODO fix this for Unicode characters
+            print_utf8(a.i);
             break;
         case 0x007E: // ~: bitwise NOT
             a = stack_peek(stack);
@@ -244,7 +244,7 @@ int execute(space_t *space) {
             stack_print(stack,8);
             break;
         default:
-            eprintf("Unimplemented instruction: %llx\n",instr.i);
+            eprintf("Unimplemented instruction: %"XIx"\n",instr.i);
         }
         ip = vector3_addv(ip, iv);
 LOOP_END: // instructions may jump here to skip the usual instruction pointer advancement
@@ -256,8 +256,7 @@ LOOP_END: // instructions may jump here to skip the usual instruction pointer ad
 }
 
 int parse(FILE *fp, char *filepath, space_t *space) {
-    long file_length = 0;
-    size_t bytes_read = 0, rv = 0;
+    size_t file_length = 0, bytes_read = 0, rv = 0;
     unsigned char b = 0, b1 = 0, b2 = 0, b3 = 0; // bytes from the file
     uint32_t v; // assembled value
     // Cell and write pointer for writing to space
@@ -267,11 +266,11 @@ int parse(FILE *fp, char *filepath, space_t *space) {
     if (fp == NULL) eprintf("Error parsing %s\n", filepath);
     /* Get the length of the file (in bytes) */
     fseek(fp, 0, SEEK_END);
-    file_length = ftell(fp);
+    file_length = (size_t)ftell(fp);
     rewind(fp);
-    bprintf(2,"%s is %ld bytes long\n", filepath, file_length);
+    bprintf(2,"%s is %zu bytes long\n", filepath, file_length);
     /* Iterate through the file, byte-by-byte */
-    while (bytes_read < (unsigned long)file_length) {
+    while (bytes_read < file_length) {
         // Check that we can actually read bytes, so if we are reading from
         // stdin, we will exit the loop when we can't read any more bytes
         // This is not needed on the wider codepoints, because if an incomplete

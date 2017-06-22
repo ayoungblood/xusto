@@ -5,7 +5,7 @@
 #include "space.h"
 
 /* Create and initialize a new space */
-space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
+space_t *space_create(vector3_t block_size, size_t hash_size) {
     space_t *space = NULL;
     xint_t k, j, i;
     if ((block_size.x <= 0) || (block_size.y <= 0) || (block_size.z <= 0)) {
@@ -17,11 +17,11 @@ space_t *space_create(vector3_t block_size, unsigned long long hash_size) {
         return NULL;
     }
     // Allocate the block and initialize it
-    space->block = (cell_t***)malloc((unsigned long long)block_size.z * sizeof(cell_t**));
+    space->block = (cell_t***)malloc((size_t)block_size.z * sizeof(cell_t**));
     for (k = 0; k < block_size.z; ++k) {
-        space->block[k] = (cell_t**)malloc((unsigned long long)block_size.y * sizeof(cell_t*));
+        space->block[k] = (cell_t**)malloc((size_t)block_size.y * sizeof(cell_t*));
         for (j = 0; j < block_size.y; ++j) {
-            space->block[k][j] = (cell_t*)malloc((unsigned long long)block_size.x * sizeof(cell_t));
+            space->block[k][j] = (cell_t*)malloc((size_t)block_size.x * sizeof(cell_t));
             for (i = 0; i < block_size.x; ++i) {
                 space->block[k][j][i].i = 0;
             }
@@ -82,21 +82,20 @@ void space_print(space_t *space, vector3_t start, vector3_t end, int borders) {
     xint_t k, j, i;
     cell_t cell;
     for (k = start.z; k <= end.z; ++k) {
-        eprintf("(%lld:%lld,%lld:%lld,%lld):\n",
-            (uint64_t)start.x,(uint64_t)end.x,
-            (uint64_t)start.y,(uint64_t)end.y,(uint64_t)k);
+        eprintf("(%"XId":%"XId",%"XId":%"XId",%"XId"):\n",
+            start.x,end.x,start.y,end.y,k);
         if (borders) {
             eprintf("       ");
-            for (i = start.x; i <= end.x; ++i) eprintf("%4llx ", (int64_t)i);
+            for (i = start.x; i <= end.x; ++i) eprintf("%4"XId"", i);
             eprintf("\n       ");
             for (i = start.x; i <= end.x; ++i) eprintf("---- ");
             eprintf("\n");
         }
         for (j = start.y; j <= end.y; ++j) {
-            if (borders) eprintf("%4llx | ", (int64_t)j);
+            if (borders) eprintf("%4"XId" | ", j);
             for (i = start.x; i <= end.x; ++i) {
                 cell = space_get(space, vector3(i,j,k));
-                eprintf("%04llx ", (int64_t)cell.i);
+                eprintf("%04"XIx" ", cell.i);
             }
             eprintf("\n");
         }

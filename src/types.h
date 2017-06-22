@@ -6,14 +6,18 @@
 #define _TYPES_H
 
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <float.h>
 #include <stdlib.h>
 
 // General signed integer type
-typedef int_fast64_t xint_t;
+typedef int_fast64_t    xint_t;
+// Format constants for xint_t
+#define XId             PRIdFAST64  // signed decimal integer
+#define XIx             PRIxFAST64  // unsigned lowercase hex integer
 // General floating point type
-typedef double xfloat_t;
+typedef double          xfloat_t;
 
 /* Union type for a cell representing signed integer or float types */
 typedef union {

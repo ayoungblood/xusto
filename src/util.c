@@ -21,3 +21,28 @@ void cprintf(const char *color, const char *format, ...) {
     va_end(args);
 #pragma GCC diagnostic pop
 }
+
+// Convert an integer value into a UTF-8 byte string and print to stdout
+void print_utf8(xint_t c) {
+    // Octal notation because UTF-8 uses six bit groups
+    if (c < 0200) {
+        // 00 - 0177 (0x0 - 0x7f): one byte
+        printf("%c",(char)(c      & 0177));
+    } else if (c < 04000) {
+        // 0200 - 03777 (0x80 - 0x7ff): two bytes
+        // 0x80 - 0x7ff: two bytes
+        printf("%c",(char)((c>>6  & 037) | 0300));
+        printf("%c",(char)((c     & 077) | 0200));
+    } else if (c < 0xffff) {
+        // 04000 - 0177777 (0x800 - 0xffff): three bytes
+        printf("%c",(char)((c>>12 & 017) | 0340));
+        printf("%c",(char)((c>>6  & 077) | 0200));
+        printf("%c",(char)((c     & 077) | 0200));
+    } else {
+        // 0200000 - 04177777 (0x10000 - 0x10FFFF): four bytes
+        printf("%c",(char)((c>>18 &  07) | 0360));
+        printf("%c",(char)((c>>12 & 077) | 0200));
+        printf("%c",(char)((c>>6  & 077) | 0200));
+        printf("%c",(char)((c     & 077) | 0200));
+    }
+}

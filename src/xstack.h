@@ -12,12 +12,12 @@ typedef struct xstack_t {
     cell_t *start;
     cell_t *top;
     //uint64_t size;
-    uint64_t max;
+    size_t max;
 } xstack_t;
 // xstack_t because stack_t conflicts with GNU stack
 
 /* Create and initialize a new stack */
-xstack_t *stack_create(uint64_t size);
+xstack_t *stack_create(size_t size);
 /* Deallocate and destroy an existing stack */
 void stack_destroy(xstack_t *stack);
 /* Push a value onto the stack */
@@ -27,7 +27,7 @@ cell_t stack_pop(xstack_t *stack);
 /* Peek the top of the stack */
 cell_t stack_peek(xstack_t *stack);
 /* Get the size of the stack */
-uint64_t stack_size(xstack_t *stack);
+size_t stack_size(xstack_t *stack);
 /* Print the top n stack entries */
 void stack_print(xstack_t *stack, uint64_t n);
 

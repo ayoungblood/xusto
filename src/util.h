@@ -55,7 +55,10 @@
 /* Print wrappers, because macros can't do everything */
 // Colorized (env-aware) printing to stderr
 void cprintf(const char *color, const char *format, ...);
+// Print a single xint_t value as a UTF-8 codepoint (byte sequence)
+void print_utf8(xint_t c);
 
+// Global flags bit vector
 flags_t flags;
 
 void fp_list_cleanup(fp_list_t *fp_list);
