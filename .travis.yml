@@ -14,11 +14,11 @@ before_install:
 install:
 before_script:
 script:
-    - make info
     - make
     - make test
-    - make run
+    - make run-integration
 after_success:
+    # Upload coverage reports
     - bash <(curl -s https://codecov.io/bash)
     - make clean
 

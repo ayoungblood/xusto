@@ -94,6 +94,10 @@ all: $(TARGET)
 run: $(TARGET)
 		./$(TARGET) -vv sandbox/test-files/u.4
 
+run-integration: $(TARGET)
+		./$(TARGET) integration-test/ip.xs3
+		./$(TARGET) integration-test/math.xs3
+
 # Build, run, and clean unit tests
 test: $(OBJECTS) all
 		# vector3 tests

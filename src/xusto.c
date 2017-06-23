@@ -74,6 +74,7 @@ int execute(space_t *space) {
         }
         // Execute the current instruction
         switch (instr.i) {
+        case 0x0000: // NULL: no-op
         case 0x0020: // SPACE: no-op
             break;
         case 0x0021: // !: logical NOT
@@ -161,7 +162,7 @@ int execute(space_t *space) {
             break;
 
         case 0x003E: // >: right
-            iv = vector3(0,0,-1);
+            iv = vector3(1,0,0);
             break;
 
         case 0x005B: // [: print integer
@@ -174,7 +175,7 @@ int execute(space_t *space) {
             print_utf8(a.i);
             break;
         case 0x005E: // ^: up
-            iv = vector3(0,1,0);
+            iv = vector3(0,-1,0);
             break;
         case 0x005F: // _: trampoline
             ip = vector3_addv(ip, iv);
@@ -219,7 +220,7 @@ int execute(space_t *space) {
             break;
 
         case 0x0076: // v: down
-            iv = vector3(0,-1,0);
+            iv = vector3(0,1,0);
             break;
 
         case 0x007B: // {: peek print integer
@@ -244,7 +245,11 @@ int execute(space_t *space) {
             stack_print(stack,8);
             break;
         default:
-            eprintf("Unimplemented instruction: %"XIx"\n",instr.i);
+            if (VERBOSITY)
+                eprintf("Unimplemented instruction: %"XIx" at %"XId",%"XId",%"XId"\n",instr.i,ip.x,ip.y,ip.z);
+            else
+                eprintf("Unimplemented instruction: %"XIx"\n",instr.i);
+            return 0;
         }
         ip = vector3_addv(ip, iv);
 LOOP_END: // instructions may jump here to skip the usual instruction pointer advancement
