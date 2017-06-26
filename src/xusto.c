@@ -53,7 +53,7 @@ int execute(space_t *space) {
     // Current instruction
     cell_t instr;
     // Temporary cells for stack operations
-    cell_t a, b;
+    cell_t a, b, x, y, z;
     // Portal
     vector3_t portal;
     // Create stack
@@ -161,6 +161,10 @@ int execute(space_t *space) {
         case 0x0039: // 9: push 0x09
             stack_push(stack,cell(0x09));
             break;
+        case 0x003A: // :: duplicate
+            a = stack_peek(stack);
+            stack_push(stack,a);
+            break;
 
         case 0x003C: // <: left
             iv = vector3(-1,0,0);
@@ -213,7 +217,12 @@ int execute(space_t *space) {
         case 0x0066: // f: push 0x0f
             stack_push(stack,cell(0x0f));
             break;
-
+        case 0x0067: // g: get
+            x = stack_pop(stack);
+            y = stack_pop(stack);
+            z = stack_pop(stack);
+            stack_push(stack,space_get(space,vector3(x.i,y.i,z.i)));
+            break;
         case 0x0068: // h: halt
             // clear execute bit
             state &= ~STATE_F_EXECUTE;
@@ -245,6 +254,14 @@ int execute(space_t *space) {
             break;
         case 0x0070: // p: pop
             (void)stack_pop(stack);
+            break;
+
+        case 0x0073: // s: set
+            x = stack_pop(stack);
+            y = stack_pop(stack);
+            z = stack_pop(stack);
+            a = stack_pop(stack);
+            space_set(space,vector3(x.i,y.i,z.i),a);
             break;
 
         case 0x0075: // u: if, up/down
