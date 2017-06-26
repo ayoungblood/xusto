@@ -1,8 +1,10 @@
 Xusto
 =====
 
-branch `master`: ![master build status](https://api.travis-ci.org/ayoungblood/xusto.svg?branch=master)  
+branch `master`: ![master build status](https://api.travis-ci.org/ayoungblood/xusto.svg?branch=master)
+[![codecov](https://codecov.io/gh/ayoungblood/xusto/branch/master/graph/badge.svg)](https://codecov.io/gh/ayoungblood/xusto)  
 branch `develop`: ![develop build status](https://api.travis-ci.org/ayoungblood/xusto.svg?branch=develop)
+[![codecov](https://codecov.io/gh/ayoungblood/xusto/branch/develop/graph/badge.svg)](https://codecov.io/gh/ayoungblood/xusto/branch/develop)
 
 Xusto is an esoteric, stack-based, interpreted (thus far), reflective, computer programming language. This repository contains both the language specification and an interpreter written in C.
 
