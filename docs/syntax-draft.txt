@@ -1,34 +1,42 @@
-UNASSIGNED:
-natural: push e (2.71828...)
-gate: peek a, do not advance iptr until next cell is equal to a
-sync: not sure how to implement this, but a way to synchronize two threads would be cool
-set x: pop a; set iv.x = a
-set y: pop a; set iv.y = a
-set z: pop a; set iv.z = a
-kilo: pop a, push a * 10^3
-giga: pop a, push a * 10^12
-micro: pop a, push a * 10^-3
-nano: pop a, push a * 10^-9
-mega: pop a, push a * 10^6
+UNASSIGNED CORE:
+jump: pop x, y, z; set ip = (x,y,z)
+jump subroutine: pop x, y, z; push ip.z, ip.y, ip.x; set ip = (x,y,z)
+vector: pop x, y, z; set iv = (x,y,z)
 bounce: set iv = (-x,-y,-z)
-warp: set warp
-swap: pop a, b; push a, b
 greater: pop a, b; push a > b
 lesser: pop a, b; push a < b
-get: pop x, y, z, push space(x,y,z)
-set: pop x, y, z, v, set space(x,y,z) = v
-branch right/left
-branch in/out
-branch up/down
-duplicate: peek a; push a
-pop a,b; push a * 10^b
-equality: pop a, b; push a==b
+user char: get char from stdin; push
+user int: get integer from stdin; push
+increment: pop a; ++a; push a
+decrement: pop a; --a; push a
+tug: copy n-th stack item to top
+macro: pop a; pop null-terminated string; insert string into function table at index a
+
+UNASSIGNED EXTENDED:
+push epoch time
+push moon phase
+set state flag bit
+clear state flag bit
+blocking sleep: pop a; sleep for a picocenturies (3156us, or ~pi s)
+whack: whack the interpreter, causing it to say "Ouch!"
+execute: pop a; execute a
+
+UNASSIGNED INTEGER/BIT:
+exponent: pop a, b; push a^b
+rotate left: pop a; push bitwise left rotate a
+rotate right: pop a; push bitwise right rotate a
+range: pop a, b; push a, a+1, ..., b-1, b
+
+UNASSIGNED THREAD:
+gate: peek a, do not advance iptr until next cell is equal to a
+sync: not sure how to implement this, but a way to synchronize two threads would be cool
 
 UNASSIGNED FLOAT:
 float add
 float subtract
 float multiply
 float divide
+float abs
 float sqrt
 float exponent (x^y)
 float log (log_y x)
@@ -44,6 +52,15 @@ float round
 float sin/cos/tan
 float sinh/cosh/tanh
 float push infinity
+float push e (2.71828...)
+float push pi (3.141592...)
+nano: pop a, push a * 10^-9
+micro: pop a; push a * 10^-6
+milli: pop a, push a * 10^-3
+kilo: pop a, push a * 10^3
+mega: pop a, push a * 10^6
+giga: pop a, push a * 10^9
+factorial
 
 ## U+0000 - U+001F: Control codes (Parser instructions)
 U+0000 - NUL,   Does nothing
@@ -80,39 +97,39 @@ U+001E - RS,    <reserved>
 U+001F - US,    <reserved>
 
 ## U+0020 - U+007E: Basic Latin (Core instructions)
-U+0020 - SPACE, no-op
-U+0021 - !,     logical NOT: pop a; push 1 if a == 0, 0 otherwise
-U+0022 - ",     PUSHCHAR: toggle PUSHCHAR mode
-U+0023 - #,     drop portal: store ip to portal register
+U+0020 - SPACE  no-op
+U+0021 - !      logical NOT: pop a; push 1 if a == 0, 0 otherwise
+U+0022 - "      PUSHCHAR: toggle PUSHCHAR mode
+U+0023 - #      drop portal: store ip to portal register
 U+0024 - $,
-U+0025 - %,     modulo: pop a, b; push b%a
-U+0026 - &,     bitwise AND: pop a, b; push (a AND b)
-U+0027 - ',     lazy print: pop a; print as a character; loop until a == 0
+U+0025 - %      modulo: pop a, b; push b%a
+U+0026 - &      bitwise AND: pop a, b; push (a AND b)
+U+0027 - '      lazy print: pop a; print as a character; loop until a == 0
 U+0028 - (,
 U+0029 - ),
-U+002A - *,     multiply: pop a, b; push (a * b)
-U+002B - +,     add: pop a, b; push (a + b)
+U+002A - *      multiply: pop a, b; push (a * b)
+U+002B - +      add: pop a, b; push (a + b)
 U+002C - ,,
-U+002D - -,     subtract: pop a, b; push (a - b)
-U+002E - .,     out: set iv = (0,0,-1)
-U+002F - /,     divide: pop a, b; push (a / b)
-U+0030 - 0,     push 0x00
-U+0031 - 1,     push 0x01
-U+0032 - 2,     push 0x02
-U+0033 - 3,     push 0x03
-U+0034 - 4,     push 0x04
-U+0035 - 5,     push 0x05
-U+0036 - 6,     push 0x06
-U+0037 - 7,     push 0x07
-U+0038 - 8,     push 0x08
-U+0039 - 9,     push 0x09
-U+003A - :,
+U+002D - -      subtract: pop a, b; push (a - b)
+U+002E - .      out: set iv = (0,0,-1)
+U+002F - /      divide: pop a, b; push (a / b)
+U+0030 - 0      push 0x00
+U+0031 - 1      push 0x01
+U+0032 - 2      push 0x02
+U+0033 - 3      push 0x03
+U+0034 - 4      push 0x04
+U+0035 - 5      push 0x05
+U+0036 - 6      push 0x06
+U+0037 - 7      push 0x07
+U+0038 - 8      push 0x08
+U+0039 - 9      push 0x09
+U+003A - :,     duplicate: peek a; push a
 U+003B - ;,
-U+003C - <,     left: set iv = (-1,0,0)
-U+003D - =,
-U+003E - >,     right: set iv = (1,0,0)
+U+003C - <      left: set iv = (-1,0,0)
+U+003D - =
+U+003E - >      right: set iv = (1,0,0)
 U+003F - ?,
-U+0040 - @,     use portal: restore portal register to ip
+U+0040 - @      use portal: restore portal register to ip
 U+0041 - A,
 U+0042 - B,
 U+0043 - C,
@@ -139,42 +156,42 @@ U+0057 - W,
 U+0058 - X,
 U+0059 - Y,
 U+005A - Z,
-U+005B - [,     print integer: pop i; print i as an integer
-U+005C - \,
-U+005D - ],     print char: pop c; print c as a character
-U+005E - ^,     up: set iv = (0,1,0)
-U+005F - _,     trampoline: advance ip twice (skipping next instruction)
+U+005B - [      print integer: pop i; print i as an integer
+U+005C - \      swap: pop a, b; push a; push b
+U+005D - ]      print char: pop c; print c as a character
+U+005E - ^      up: set iv = (0,1,0)
+U+005F - _      trampoline: advance ip twice (skipping next instruction)
 U+0060 - `,
-U+0061 - a,     push 0x0a
-U+0062 - b,     push 0x0b
-U+0063 - c,     push 0x0c
-U+0064 - d,     push 0x0d
-U+0065 - e,     push 0x0e
-U+0066 - f,     push 0x0f
-U+0067 - g,
-U+0068 - h,     halt: halt program execution and exit
-U+0069 - i,
-U+006A - j,     bitwise XOR: pop a, b; push (a XOR b)
+U+0061 - a      push 0x0a
+U+0062 - b      push 0x0b
+U+0063 - c      push 0x0c
+U+0064 - d      push 0x0d
+U+0065 - e      push 0x0e
+U+0066 - f      push 0x0f
+U+0067 - g,     get: pop x, y, z; push space(x,y,z)
+U+0068 - h      halt: halt program execution and exit
+U+0069 - i      if, in/out: pop a; if (a), set iv = (0,0,1), else iv = (0,0,-1)
+U+006A - j      bitwise XOR: pop a, b; push (a XOR b)
 U+006B - k,
-U+006C - l,
+U+006C - l      if, left/right: pop a; if (a), set iv = (1,0,0), else iv = (-1,0,0)
 U+006D - m,
 U+006E - n,
-U+006F - o,     into: set iv = (0,0,1)
-U+0070 - p,     pop: pop a; discard a
+U+006F - o      into: set iv = (0,0,1)
+U+0070 - p      pop: pop a; discard a
 U+0071 - q,
 U+0072 - r,
-U+0073 - s,
+U+0073 - s,     set: pop x, y, z, a; set space(x,y,z) = a
 U+0074 - t,
-U+0075 - u,
-U+0076 - v,     down: set iv = (0,-1,0)
-U+0077 - w,
-U+0078 - x,
+U+0075 - u      if, up/down: pop a; if (a), set iv = (0,1,0), else iv = (0,-1,0)
+U+0076 - v      down: set iv = (0,-1,0)
+U+0077 - w,     set warp: pop x, y, z; set warp = (x,y,z)
+U+0078 - x      conditional XY rotate: pop a; if (a), rotate iv cw, else rotate iv ccw
 U+0079 - y,
 U+007A - z,
-U+007B - {,     peek print integer: peek i; print i as an integer
-U+007C - |,     bitwise OR: pop a, b; push (a OR b)
-U+007D - },     peek print char: peek c; print c as a character
-U+007E - ~,     bitwise NOT: pop a; push (NOT a)
+U+007B - {      peek print integer: peek i; print i as an integer
+U+007C - |      bitwise OR: pop a, b; push (a OR b)
+U+007D - }      peek print char: peek c; print c as a character
+U+007E - ~      bitwise NOT: pop a; push (NOT a)
 
 ## U+007F - U+009F: Control codes (Reserved)
 ...

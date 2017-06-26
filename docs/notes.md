@@ -7,7 +7,7 @@ The preprocessor/parser loads instructions from the source file into the executi
 
 This is done by reserving certain characters for parser instruction. The first 32 code points in UTF-8 (which are identical to the first 32 ASCII characters, and are non-printable) are reserved as parser instructions. The parser instruction mapping is designed to be as logical as possible, letting the control chars move a "virtual cursor" (a write pointer) through the execution space during parsing in a way that matches the behavior of a plaintext file.
 
-As the parser instructions refer to moving through 3D space, the instruction descriptions use a consistent convention when referring to movement through 3D space. The space is modeled with X,Y,Z coordinates. Relative to a computer screen, X may be thought of as "left/right", Y is "up/down" and Z is "into/out":
+As the parser instructions refer to moving through 3D space, the instruction descriptions use a consistent convention when referring to movement through 3D space. The space is modeled with X,Y,Z coordinates. Relative to a computer screen, X may be thought of as "left/right", Y is "up/down" and Z is "into/out". However, note that with regards to the positive/negative directions, the coordinate system is unlike typical coordinate systems used in mathematics, but is instead like some computer graphics environments:
 
 - +x: right
 - -x: left
@@ -81,6 +81,21 @@ An executor manages the execution loop (does the interpreting), and has:
 - pointer to a cube (the execution space)
 
 Eventually, executors can be threaded, so that an instruction causes an executor to spawn another executor, copying state (probably duplicated the stack, but maybe not?), changing the instruction_vector (so the thread goes off in a new direction) and using the same space reference. Another instruction will cause the executor to terminate. By spinning on memory locations, executors can be synchronized. There could also be an instruction for explictly blocking/synchronizing executors.
+
+### Instruction Details
+
+**x: conditional 2D rotate**
+
+                               y=x; x=-y;            y=-x; x=y;
+    ( 1, 0, 0) "right"      -> ( 0, 1, 0) "down"  or ( 0,-1, 0) "up"
+    (-1, 0, 0) "left"       -> ( 0,-1, 0) "up"    or ( 0, 1, 0) "down"
+    ( 0, 1, 0) "down"       -> (-1, 0, 0) "left"  or ( 1, 0, 0) "right"
+    ( 0,-1, 0) "up"         -> ( 1, 0, 0) "right" or (-1, 0, 0) "left"
+
+    ( 1, 1, 0) "down/right" -> (-1, 1, 0) "down/left"  or ( 1,-1, 0) "up/right"
+    (-1, 1, 0) "down/left"  -> (-1,-1, 0) "up/left"    or ( 1, 1, 0) "down/right"
+    (-1,-1, 0) "up/left"    -> ( 1,-1, 0) "up/right"   or (-1, 1, 0) "down/left"
+    ( 1,-1, 0) "up/right"   -> ( 1, 1, 0) "down/right" or (-1,-1, 0) "up/left"
 
 ### References
 

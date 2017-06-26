@@ -49,11 +49,13 @@ int execute(space_t *space) {
     // Stack
     xstack_t *stack;
     // Instruction pointer and instruction vector
-    vector3_t ip, iv;
+    vector3_t ip, iv, tempv;
     // Current instruction
     cell_t instr;
     // Temporary cells for stack operations
     cell_t a, b;
+    // Portal
+    vector3_t portal;
     // Create stack
     if ((stack = stack_create(1<<8)) == NULL) return RETURN_INIT_FAIL;
     // Initialize instruction vector and instruction pointer
@@ -83,6 +85,9 @@ int execute(space_t *space) {
             break;
         case 0x0022: // ": PUSHCHAR
             state ^= STATE_F_PUSHCHAR;
+            break;
+        case 0x0023: // #: drop portal
+            portal = ip;
             break;
 
         case 0x0025: // %: modulo
@@ -165,11 +170,20 @@ int execute(space_t *space) {
             iv = vector3(1,0,0);
             break;
 
+        case 0x0040: // @: use portal
+            ip = portal;
+            break;
+
         case 0x005B: // [: print integer
             a = stack_pop(stack);
             printf("%"XId"",a.i);
             break;
-
+        case 0x005C: // \: swap
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            stack_push(stack,a);
+            stack_push(stack,b);
+            break;
         case 0x005D: // ]: print character
             a = stack_pop(stack);
             print_utf8(a.i);
@@ -205,11 +219,25 @@ int execute(space_t *space) {
             state &= ~STATE_F_EXECUTE;
             bprintf(1,"Halted execution at (%"XId",%"XId",%"XId")\n",ip.x,ip.y,ip.z);
             break;
-
+        case 0x0069: // i: if, up/down
+            a = stack_pop(stack);
+            if (a.i)
+                iv = vector3(0,0,1);
+            else
+                iv = vector3(0,0,-1);
+            break;
         case 0x006A: // j: bitwise XOR
             a = stack_pop(stack);
             b = stack_pop(stack);
             stack_push(stack,cell(a.i ^ b.i));
+            break;
+
+        case 0x006C: // l: if, left/right
+            a = stack_pop(stack);
+            if (a.i)
+                iv = vector3(1,0,0);
+            else
+                iv = vector3(-1,0,0);
             break;
 
         case 0x006F: // o: into
@@ -219,8 +247,27 @@ int execute(space_t *space) {
             (void)stack_pop(stack);
             break;
 
+        case 0x0075: // u: if, up/down
+            a = stack_pop(stack);
+            if (a.i)
+                iv = vector3(0,1,0);
+            else
+                iv = vector3(0,-1,0);
+            break;
         case 0x0076: // v: down
             iv = vector3(0,1,0);
+            break;
+
+        case 0x0078: // x: conditional XY rotate
+            tempv = iv;
+            a = stack_pop(stack);
+            if (a.i) {
+                iv.y = tempv.x;
+                iv.x = -tempv.y;
+            } else {
+                iv.y = -tempv.x;
+                iv.x = tempv.y;
+            }
             break;
 
         case 0x007B: // {: peek print integer
