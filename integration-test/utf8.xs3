@@ -1,0 +1,36 @@
+> 1 0 [[ v           Print integer
+v        <
+> 3 2 {p{p v         Peek print integer
+v          <
+> a5*3+ a5*2+ ]] v   Print char
+v                <
+> a5*5+ a5*4+ }p}p v Peek print char
+v                  <
+> a"98"' v            Lazy print
+v        <
+> af*a4*+2+ ] 884** ] a5*9*b+ ] 5b*a*2a*+ ] v Various two-byte codepoints (0x80 - 0x7ff)
+v                                           <
+> 9aa**d+ ] aaa**a4*+ ] caa**84*+ } 2+ } 2+ } 2+ ] a ] v
+v                                                      <
+> f2* 884*** } :1f+a*+ ] 1f+:*+ } :1f+7*+ ] 1f+:*3*+ ] v Various three-byte codepoints (0x800 - 0xffff)
+v                                                      <
+> cc*88** :: 1f+b*6++ ] 1f+d*+ ] 1f+:*8*+ 82*6*+f+ ] 884**352f+***b3*+ ] a ] v
+v                                                                            <
+> 88*:*82** 888**+ : 1f+a*+ ] 884**+ ] v Various three-byte codepoints (0x10000 - 0x10FFFF)
+v                                      <
+> 33*8844****d* } 1f+d*+ : ] 1f+d*+ } 1f+d*+ ] v
+v                                              <
+> 1f+ f+ 1f+* 1+ 1f+* 1+ 1f+* } 48*+ } 48*+ ] a] v
+h                                                v
+v                                 '"0123456789"a <
+                                    >>>>>>>>>>>>>>>>>>>>>> a"EPON"'h
+>                                                v
+v                                 '"ÀĀǍȺΑАӐӒӔӖ"a <
+                                   >>>>>>>>>>>>>>>>>>>>>> a"EPON"'h
+>                                                v
+v                                  '"ḀẠἀὰ∀ⒶⓐⱯＡ"a <
+                                   >>>>>>>>>>>>>>>>>>>>>> a"EPON"'h
+>                                                v
+v                                  '"𐊠𐌀𝐀𝓐𝖠𝙰🄐🄰🅐"a <
+                                   >>>>>>>>>>>>>>>>>>>>>> a"EPON"'h
+> a"KO" ' h

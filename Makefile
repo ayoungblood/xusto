@@ -97,6 +97,7 @@ run: $(TARGET)
 run-integration: $(TARGET)
 		./$(TARGET) integration-test/ip.xs3
 		./$(TARGET) integration-test/math.xs3
+		./$(TARGET) integration-test/utf8.xs3
 
 # Build, run, and clean unit tests
 test: $(OBJECTS) all
