@@ -1,4 +1,28 @@
 >                                        v
 Instruction pointer movement instructions
 v                                        <
-> a"KO"'h
+> _h _ _h                                v Trampoline test
+    v 1                                  <
+  h l 0 v                                  If, left/right, should go right
+      v l h                                If, left/right, should go left
+hhhhhh hhhh
+      > 1 u   >  v                         If, up/down, should go down
+          > 0 u                            If, up/down, should go up
+              hhh hh
+v  #             #hh                       Drop portal
+@hh hh        hh@<hh                       Use portal
+hh > vhhhhh
+hx<0<v_<<xh                                Conditional XY rotate
+hvhhhvhhh^h
+hvhhh0hhh0h
+hvhhhvhhh^h
+h_hhhx>0>xh
+hhhhhhhhhhh
+hvhhhx>>>>> a"KO"'h
+h>>>>>>8>xh
+hhhhh_hhhvh
+hhhhh^hhhvh
+hhhhh8hhh8h
+hhhhh^hhhvh
+hhhhhx<8<xh
+hhhhhhhhhhh
