@@ -102,17 +102,17 @@ U+0021 - !      logical NOT: pop a; push 1 if a == 0, 0 otherwise
 U+0022 - "      PUSHCHAR: toggle PUSHCHAR mode
 U+0023 - #      drop portal: store ip to portal register
 U+0024 - $,
-U+0025 - %      modulo: pop a, b; push b%a
+U+0025 - %      modulo: pop a, b; push (b % a)
 U+0026 - &      bitwise AND: pop a, b; push (a AND b)
 U+0027 - '      lazy print: pop a; print as a character; loop until a == 0
 U+0028 - (,
 U+0029 - ),
-U+002A - *      multiply: pop a, b; push (a * b)
-U+002B - +      add: pop a, b; push (a + b)
+U+002A - *      multiply: pop a, b; push (b * a)
+U+002B - +      add: pop a, b; push (b + a)
 U+002C - ,,
-U+002D - -      subtract: pop a, b; push (a - b)
+U+002D - -      subtract: pop a, b; push (b - a)
 U+002E - .      out: set iv = (0,0,-1)
-U+002F - /      divide: pop a, b; push (a / b)
+U+002F - /      divide: pop a, b; push (b / a)
 U+0030 - 0      push 0x00
 U+0031 - 1      push 0x01
 U+0032 - 2      push 0x02
@@ -126,7 +126,7 @@ U+0039 - 9      push 0x09
 U+003A - :      duplicate: peek a; push a
 U+003B - ;,
 U+003C - <      left: set iv = (-1,0,0)
-U+003D - =
+U+003D - =      equality: pop a, b; push 1 if b == a; push 0 otherwise
 U+003E - >      right: set iv = (1,0,0)
 U+003F - ?,
 U+0040 - @      use portal: restore portal register to ip

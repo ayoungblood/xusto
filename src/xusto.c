@@ -93,7 +93,7 @@ int execute(space_t *space) {
         case 0x0025: // %: modulo
             a = stack_pop(stack);
             b = stack_pop(stack);
-            stack_push(stack,cell(a.i % b.i)); // @TODO b%a ?
+            stack_push(stack,cell(b.i % a.i));
             break;
         case 0x0026: // &: bitwise AND
             a = stack_pop(stack);
@@ -110,18 +110,18 @@ int execute(space_t *space) {
         case 0x002A: // *: multiply
             a = stack_pop(stack);
             b = stack_pop(stack);
-            stack_push(stack,cell(a.i * b.i));
+            stack_push(stack,cell(b.i * a.i));
             break;
         case 0x002B: // +: add
             a = stack_pop(stack);
             b = stack_pop(stack);
-            stack_push(stack,cell(a.i + b.i));
+            stack_push(stack,cell(b.i + a.i));
             break;
 
         case 0x002D: // -: subtract
             a = stack_pop(stack);
             b = stack_pop(stack);
-            stack_push(stack,cell(a.i - b.i)); // @TODO b-a ?
+            stack_push(stack,cell(b.i - a.i));
             break;
         case 0x002E: // .: out
             iv = vector3(0,0,-1);
@@ -129,7 +129,7 @@ int execute(space_t *space) {
         case 0x002F: // /: divide
             a = stack_pop(stack);
             b = stack_pop(stack);
-            stack_push(stack,cell(a.i / b.i)); // @TODO b/a ?
+            stack_push(stack,cell(b.i / a.i));
             break;
         case 0x0030: // 0: push 0x00
             stack_push(stack,cell(0x00));
@@ -169,7 +169,14 @@ int execute(space_t *space) {
         case 0x003C: // <: left
             iv = vector3(-1,0,0);
             break;
-
+        case 0x003D: // =: equality
+            a = stack_pop(stack);
+            b = stack_pop(stack);
+            if (a.i == b.i)
+                stack_push(stack,cell(0x1));
+            else
+                stack_push(stack,cell(0x0));
+            break;
         case 0x003E: // >: right
             iv = vector3(1,0,0);
             break;
