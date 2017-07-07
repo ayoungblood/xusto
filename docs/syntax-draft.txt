@@ -163,8 +163,8 @@ U+0043 - C,
 U+0044 - D,
 U+0045 - E,
 U+0046 - F,
-U+0047 - G,
-U+0048 - H,
+U+0047 - G,     get: pop x, y, z; push space(x,y,z)
+U+0048 - H,     halt: halt program execution and exit
 U+0049 - I,
 U+004A - J,
 U+004B - K,
@@ -175,11 +175,11 @@ U+004F - O,
 U+0050 - P,
 U+0051 - Q,
 U+0052 - R,
-U+0053 - S,
+U+0053 - S,     set: pop x, y, z, a; set space(x,y,z) = a
 U+0054 - T,
 U+0055 - U,
 U+0056 - V,
-U+0057 - W,
+U+0057 - W,     set warp: pop x, y, z; set warp = (x,y,z)
 U+0058 - X,
 U+0059 - Y,
 U+005A - Z,
@@ -195,8 +195,8 @@ U+0063 - c      push 0x0c
 U+0064 - d      push 0x0d
 U+0065 - e      push 0x0e
 U+0066 - f      push 0x0f
-U+0067 - g      get: pop x, y, z; push space(x,y,z)
-U+0068 - h      halt: halt program execution and exit
+U+0067 - g
+U+0068 - h
 U+0069 - i      if, in/out: pop a; if (a), set iv = (0,0,1), else iv = (0,0,-1)
 U+006A - j      bitwise XOR: pop a, b; push (a XOR b)
 U+006B - k,
@@ -207,11 +207,11 @@ U+006F - o      into: set iv = (0,0,1)
 U+0070 - p      pop: pop a; discard a
 U+0071 - q,
 U+0072 - r,
-U+0073 - s      set: pop x, y, z, a; set space(x,y,z) = a
+U+0073 - s
 U+0074 - t,
 U+0075 - u      if, up/down: pop a; if (a), set iv = (0,1,0), else iv = (0,-1,0)
 U+0076 - v      down: set iv = (0,-1,0)
-U+0077 - w,     set warp: pop x, y, z; set warp = (x,y,z)
+U+0077 - w,
 U+0078 - x      conditional XY rotate: pop a; if (a), rotate iv cw, else rotate iv ccw
 U+0079 - y,
 U+007A - z,

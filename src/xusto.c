@@ -185,6 +185,33 @@ int execute(space_t *space) {
             ip = portal;
             break;
 
+        case 0x0047: // G: get
+            x = stack_pop(stack);
+            y = stack_pop(stack);
+            z = stack_pop(stack);
+            stack_push(stack,space_get(space,vector3(x.i,y.i,z.i)));
+            break;
+        case 0x0048: // H: halt
+            // clear execute bit
+            state &= ~STATE_F_EXECUTE;
+            bprintf(1,"Halted execution at (%"XId",%"XId",%"XId")\n",ip.x,ip.y,ip.z);
+            break;
+
+        case 0x0053: // S: set
+            x = stack_pop(stack);
+            y = stack_pop(stack);
+            z = stack_pop(stack);
+            a = stack_pop(stack);
+            space_set(space,vector3(x.i,y.i,z.i),a);
+            break;
+
+        case 0x0057: // W: set warp
+            x = stack_pop(stack);
+            y = stack_pop(stack);
+            z = stack_pop(stack);
+            //warp = vector3(x.i,y.i,z.i); @TODO implement warp
+            break;
+
         case 0x005B: // [: print integer
             a = stack_pop(stack);
             printf("%"XId"",a.i);
@@ -224,17 +251,7 @@ int execute(space_t *space) {
         case 0x0066: // f: push 0x0f
             stack_push(stack,cell(0x0f));
             break;
-        case 0x0067: // g: get
-            x = stack_pop(stack);
-            y = stack_pop(stack);
-            z = stack_pop(stack);
-            stack_push(stack,space_get(space,vector3(x.i,y.i,z.i)));
-            break;
-        case 0x0068: // h: halt
-            // clear execute bit
-            state &= ~STATE_F_EXECUTE;
-            bprintf(1,"Halted execution at (%"XId",%"XId",%"XId")\n",ip.x,ip.y,ip.z);
-            break;
+
         case 0x0069: // i: if, up/down
             a = stack_pop(stack);
             if (a.i)
@@ -263,13 +280,6 @@ int execute(space_t *space) {
             (void)stack_pop(stack);
             break;
 
-        case 0x0073: // s: set
-            x = stack_pop(stack);
-            y = stack_pop(stack);
-            z = stack_pop(stack);
-            a = stack_pop(stack);
-            space_set(space,vector3(x.i,y.i,z.i),a);
-            break;
 
         case 0x0075: // u: if, up/down
             a = stack_pop(stack);
