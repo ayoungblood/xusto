@@ -97,6 +97,48 @@ Eventually, executors can be threaded, so that an instruction causes an executor
     (-1,-1, 0) "up/left"    -> ( 1,-1, 0) "up/right"   or (-1, 1, 0) "down/left"
     ( 1,-1, 0) "up/right"   -> ( 1, 1, 0) "down/right" or (-1,-1, 0) "up/left"
 
+**unassigned: format string**
+
+Must be able to print integer in base n, float with n digits, or ???
+- Integer
+    - Binary (base-2)
+    - Octal (base-8)
+    - Signed decimal (base-10)
+    - Unsigned decimal (base-10)
+    - Hex (base-16) (with capital or lowercase letters)
+    - RFC 4648 Base32 (base-32)
+    - RFC 4648 Base64 (base-64)
+- Float
+    - Decimal floating point
+    - Scientific (mantissa/exponent) (with capital or lowercase E)
+    - Hex floating point
+    - Decimal floating point percent
+
+Integer flavors may be fixed-width, and zero-padded or space-padded.  
+Float flavors may be fixed width, and zero-padded or space-padded, and a minimum precision may be specified
+
+[Format (Common Lisp)][1]  
+[printf format string][2]  
+[printk formats][3]
+
+[1]: https://en.wikipedia.org/wiki/Format_(Common_Lisp)
+[2]: https://en.wikipedia.org/wiki/Printf_format_string
+[3]: https://www.kernel.org/doc/Documentation/printk-formats.txt
+
+### Mac keyboard characters
+
+ALT:
+¡™£¢∞§¶•ªº–≠
+œ∑´®†¥¨ˆøπ“‘«
+åß∆˚¬…æ
+Ω≈ç√˜µ≤≥÷
+
+SHIFT-ALT:
+⁄€‹›ﬁﬂ‡°·‚—±
+Œ„´‰ˇÁ¨ˆØ∏”’»
+ÅÍÎ˝ÓÔÒÚÆ
+˜Â¯˘¿
+
 ### References
 
 **Character sets and character encoding**

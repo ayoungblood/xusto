@@ -11,6 +11,8 @@ increment: pop a; ++a; push a
 decrement: pop a; --a; push a
 tug: copy n-th stack item to top
 macro: pop a; pop null-terminated string; insert string into function table at index a
+format print: pop format specifier (?), a; print a with format
+3swap: pop a, b, c; push a, b, c
 
 UNASSIGNED EXTENDED:
 push epoch time
@@ -20,6 +22,11 @@ clear state flag bit
 blocking sleep: pop a; sleep for a picocenturies (3156us, or ~pi s)
 whack: whack the interpreter, causing it to say "Ouch!"
 execute: pop a; execute a
+ANSI: push ANSI escape string
+mersenne: MT random number generation operations
+multiply-accumulate:
+shift-accumulate:
+shift4-accumulate: pop a, b; push (b<<4) + a
 
 UNASSIGNED INTEGER/BIT:
 exponent: pop a, b; push a^b
@@ -52,8 +59,6 @@ float round
 float sin/cos/tan
 float sinh/cosh/tanh
 float push infinity
-float push e (2.71828...)
-float push pi (3.141592...)
 nano: pop a, push a * 10^-9
 micro: pop a; push a * 10^-6
 milli: pop a, push a * 10^-3
@@ -61,6 +66,28 @@ kilo: pop a, push a * 10^3
 mega: pop a, push a * 10^6
 giga: pop a, push a * 10^9
 factorial
+summation: big-sigma, pop until (0?) and sum
+product: big-pi, pop until (0?) and multiply (see U+220F)
+
+UNASSIGNED CONSTANTS:
+Euler's e (2.71828...)
+Pi (3.141592...)
+root 2
+Phi
+reciprocal fibonacci constant
+push speed of light in a vacuum (c)
+Newtonian constant of gravity (G)
+vacuum permeability (mu0)
+vacuum permittivity (epsilon0)
+characteristic impedance of vacuum (Z0)
+Coulomb's constant (ke)
+elementary charge (e)
+Avogadro's number (NA)
+Faraday constant (F)
+
+(see https://en.wikipedia.org/wiki/List_of_common_physics_notations)
+(see https://en.wikipedia.org/wiki/List_of_mathematical_symbols_by_subject)
+(see https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode)
 
 ## U+0000 - U+001F: Control codes (Parser instructions)
 U+0000 - NUL,   Does nothing
@@ -313,3 +340,13 @@ U+00FF - ÿ
 ## U+1F00 - U+1FFF: Greek Extended (Extended instructions)
 
 ## U+2000 - U+206F: General Punctuation (Extended instructions)
+
+U+2103 - ℃ degree Celsius:
+U+2107 - ℇ Euler-Mascheroni constant: push Euler's constant (~0.5772156649) to available precision
+U+2109 - ℉ degree Fahrenheit:
+U+210E - ℎ Planck constant: push Planck constant (~6.626070040E-34) to available precision
+U+210F - ℏ Planck constant over two Pi: push h-bar (~1.054571800E-34) to available precision
+U+2125 - ℥ ounce:
+U+2126 - Ω Ohm:
+U+212A - K Kelvin:
+U+212B - Å Angstrom:
