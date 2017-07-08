@@ -52,7 +52,7 @@ vector3_t vector3_dive(const vector3_t a, const vector3_t b);
 typedef uint32_t flags_t;
 
 // State type (used as a bit vector)
-typedef uint64_t state_t;
+typedef uint64_t state_flags_t;
 
 // FILE pointer list type
 typedef struct fp_list_t {

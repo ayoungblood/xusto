@@ -12,14 +12,15 @@
 #include "types.h"
 #include "space.h"
 #include "xstack.h"
+#include "state.h"
 
 #define LANG_EN
 #include "i18n.h"
 
 // Interpreter state flag bits
-#define STATE_F_EXECUTE         ((state_t)1<<0)
-#define STATE_F_PUSHCHAR        ((state_t)1<<1)
-#define STATE_F_EXCEPTION       ((state_t)1<<2)
+#define STATE_F_EXECUTE         ((state_flags_t)1<<0)
+#define STATE_F_PUSHCHAR        ((state_flags_t)1<<1)
+#define STATE_F_EXCEPTION       ((state_flags_t)1<<2)
 
 /* Execute from a space
  * @space: a space to execute
