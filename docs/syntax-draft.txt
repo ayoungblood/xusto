@@ -1,9 +1,12 @@
 UNASSIGNED CORE:
-greater: pop a, b; push a > b
-lesser: pop a, b; push a < b
+greater than: pop a, b; push b > a
+less than: pop a, b; push b < a
+greater than or equal: pop a, b; push b >= a
+less than or equal: pop a, b; push b <= a
 user char: get char from stdin; push
 user int: get integer from stdin; push
 macro: pop a; pop null-terminated string; insert string into function table at index a
+halt with return code
 
 UNASSIGNED EXTENDED:
 push epoch time
@@ -16,6 +19,16 @@ mersenne: MT random number generation operations
 multiply-accumulate:
 shift-accumulate:
 shift4-accumulate: pop a, b; push (b<<4) + a
+conditional XY gate
+set bounds
+
+UNASSIGNED DEBUG/DIAG:
+print stack
+print space
+print warp
+print bounds
+print ip, iv
+print portal
 
 UNASSIGNED INTEGER/BIT:
 exponent: pop a, b; push a^b
@@ -26,6 +39,7 @@ range: pop a, b; push a, a+1, ..., b-1, b
 UNASSIGNED THREAD:
 gate: peek a, do not advance iptr until next cell is equal to a
 sync: not sure how to implement this, but a way to synchronize two threads would be cool
+spawn: create a new thread
 
 UNASSIGNED FLOAT:
 float add
