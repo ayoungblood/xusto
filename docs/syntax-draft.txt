@@ -161,15 +161,15 @@ U+003E - >      right: set iv = (1,0,0)
 U+003F - ?,
 U+0040 - @      use portal: restore portal register to ip
 U+0041 - A,
-U+0042 - B,     bounce: set iv = (-iv.x,-iv.y,-iv.z)
+U+0042 - B      bounce: set iv = (-iv.x,-iv.y,-iv.z)
 U+0043 - C,
 U+0044 - D,
 U+0045 - E,
-U+0046 - F,     flip: pop a, b, c; push a, b, c
+U+0046 - F      flip: pop a, b, c; push a, b, c
 U+0047 - G      get: pop x, y, z; push space(x,y,z)
 U+0048 - H      halt: halt program execution and exit
 U+0049 - I,
-U+004A - J,     jump: pop x, y, z; set ip = (x,y,z)
+U+004A - J      jump: pop x, y, z; set ip = (x,y,z)
 U+004B - K,
 U+004C - L,
 U+004D - M,
@@ -177,12 +177,12 @@ U+004E - N,
 U+004F - O,
 U+0050 - P,     format print: pop a, b; print a with format from b (???)
 U+0051 - Q,
-U+0052 - R,     jump subroutine: pop x, y, z; push ip.z, ip.y, ip.x; set ip = (x,y,z)
+U+0052 - R      jump subroutine: pop x, y, z; push ip.z, ip.y, ip.x; set ip = (x,y,z)
 U+0053 - S      set: pop x, y, z, a; set space(x,y,z) = a
 U+0054 - T,
 U+0055 - U,     unearth: copy n-th stack item to top
-U+0056 - V,     vector: pop x, y, z; set iv = (x,y,z)
-U+0057 - W,     set warp: pop x, y, z; set warp = (x,y,z)
+U+0056 - V      set vector: pop x, y, z; set iv = (x,y,z)
+U+0057 - W      set warp: pop x, y, z; set warp = (x,y,z)
 U+0058 - X,
 U+0059 - Y,
 U+005A - Z,

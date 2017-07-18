@@ -50,7 +50,7 @@ int execute(space_t *space) {
     // Current instruction
     cell_t instr;
     // Temporary cells for stack operations
-    cell_t a, b, x, y, z;
+    cell_t a, b, c, x, y, z;
 
     // Set up interpreter state
     state.flags = STATE_F_EXECUTE;
@@ -185,6 +185,18 @@ int execute(space_t *space) {
             state.ip = state.portal;
             break;
 
+        case 0x0042: // B: bounce
+            state.iv = vector3(-state.iv.x,-state.iv.y,-state.iv.z);
+            break;
+
+        case 0x0046: // F: flip
+            a = stack_pop(state.stack);
+            b = stack_pop(state.stack);
+            c = stack_pop(state.stack);
+            stack_push(state.stack,a);
+            stack_push(state.stack,b);
+            stack_push(state.stack,c);
+            break;
         case 0x0047: // G: get
             x = stack_pop(state.stack);
             y = stack_pop(state.stack);
@@ -198,6 +210,22 @@ int execute(space_t *space) {
                 state.ip.x,state.ip.y,state.ip.z);
             break;
 
+        case 0x004A: // J: jump
+            x = stack_pop(state.stack);
+            y = stack_pop(state.stack);
+            z = stack_pop(state.stack);
+            state.ip = vector3(x.i,y.i,z.i);
+            break;
+
+        case 0x0052: // R: jump subroutine
+            x = stack_pop(state.stack);
+            y = stack_pop(state.stack);
+            z = stack_pop(state.stack);
+            stack_push(state.stack,cell(state.ip.z));
+            stack_push(state.stack,cell(state.ip.y));
+            stack_push(state.stack,cell(state.ip.x));
+            state.ip = vector3(x.i,y.i,z.i);
+            break;
         case 0x0053: // S: set
             x = stack_pop(state.stack);
             y = stack_pop(state.stack);
@@ -206,6 +234,12 @@ int execute(space_t *space) {
             space_set(space,vector3(x.i,y.i,z.i),a);
             break;
 
+        case 0x0056: // V: set vector
+            x = stack_pop(state.stack);
+            y = stack_pop(state.stack);
+            z = stack_pop(state.stack);
+            state.iv = vector3(x.i,y.i,z.i);
+            break;
         case 0x0057: // W: set warp
             x = stack_pop(state.stack);
             y = stack_pop(state.stack);
