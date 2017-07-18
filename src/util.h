@@ -11,15 +11,17 @@
 
 #include "types.h"
 
-// Debugging and internal status flags
-#define MASK_DEBUG          ((flags_t)1<<0) // Show debugging messages
-#define MASK_VERBOSE        ((flags_t)3<<1) // Show verbose messages, level 0-3
-#define SHIFT_VERBOSE       ((flags_t)1)
-#define MASK_COLOR          ((flags_t)1<<3) // Colorized text output
-#define MASK_INTERACTIVE    ((flags_t)1<<4) // Interactive mode enable
+// Options and debugging flags
+#define MASK_DEBUG          ((options_t)1<<0) // Show debugging messages
+#define MASK_VERBOSE        ((options_t)3<<1) // Show verbose messages, level 0-3
+#define SHIFT_VERBOSE       ((options_t)1)
+#define MASK_COLOR          ((options_t)1<<3) // Colorized text output
+#define MASK_INTERACTIVE    ((options_t)1<<4) // Interactive mode enable
 
-#define DEBUG               (flags & MASK_DEBUG)
-#define VERBOSITY           ((flags & MASK_VERBOSE)>>SHIFT_VERBOSE)
+#define DEBUG               (options & MASK_DEBUG)
+#define VERBOSITY           ((options & MASK_VERBOSE)>>SHIFT_VERBOSE)
+#define COLOR               (options & MASK_COLOR)
+#define INTERACTIVE         (options & MASK_INTERACTIVE)
 
 // Return codes (for main)
 #define RETURN_OK           0x00
@@ -58,8 +60,8 @@ void cprintf(const char *color, const char *format, ...);
 // Print a single xint_t value as a UTF-8 codepoint (byte sequence)
 void print_utf8(xint_t c);
 
-// Global flags bit vector
-flags_t flags;
+// Global options bit vector
+options_t options;
 
 void fp_list_cleanup(fp_list_t *fp_list);
 

@@ -48,8 +48,9 @@ vector3_t vector3_mule(const vector3_t a, const vector3_t b);
 /* Element-wise vector3 division (A ./ B) */
 vector3_t vector3_dive(const vector3_t a, const vector3_t b);
 
-// Flag type (used as a bit vector)
-typedef uint32_t flags_t;
+// Options type (used as a bit vector), referred to as options to avoid confusion
+// with state flags type below
+typedef uint32_t options_t;
 
 // State type (used as a bit vector)
 typedef uint64_t state_flags_t;

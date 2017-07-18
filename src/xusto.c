@@ -5,7 +5,7 @@
 
 #include "xusto.h"
 
-extern flags_t flags;
+extern options_t options;
 
 int main(int argc, char **argv) {
     int i;
@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     fp_list_t source_fp_list;
     source_fp_list.length = 0;
     // Parse arguments and options, initializing the file list and setting options
-    int rv = arguments(argc, argv, &flags, &source_fp_list);
+    int rv = arguments(argc, argv, &options, &source_fp_list);
     if (rv != 0) return (rv == -1)?RETURN_OK:rv;
     // Loop through source file list and execute each file
     for (i = 0; i < source_fp_list.length; ++i) {
@@ -369,7 +369,7 @@ int execute(space_t *space, state_t state) {
         }
         state.ip = vector3_addv(state.ip, state.iv);
 LOOP_END: // instructions may jump here to skip the usual instruction pointer advancement
-        if (flags & MASK_INTERACTIVE) if ((rv = interactive()) != 0) return rv;
+        if (INTERACTIVE) if ((rv = interactive()) != 0) return rv;
     }
     // Flush stdout @TODO should we disable buffering on stdout instead?
     fflush(stdout);
@@ -453,7 +453,7 @@ int parse(FILE *fp, char *filepath, space_t *space) {
                     break;
                 case 0x07: // BEL (^G) Bell
                     // Whack the parser, causing it to say "OUCH"
-                    if (flags & MASK_VERBOSE) {
+                    if (VERBOSITY) {
                         cprintf(ANSI_C_YELLOW, "OUCH (%s@b%zu)\n", filepath, bytes_read);
                     } else {
                         cprintf(ANSI_C_YELLOW, "OUCH\n");
@@ -504,27 +504,27 @@ int parse(FILE *fp, char *filepath, space_t *space) {
     return 0;
 }
 
-int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
-    /* Clear flags */
-    *f = 0x0;
+int arguments(int argc, char **argv, options_t *o, fp_list_t *fp_list) {
+    /* Clear options */
+    *o = 0x0;
     /* Automatically configure colorized output based on CLICOLOR and TERM
        environment variables (CLICOLOR=1 or TERM=xterm-256color) */
     char* crv;
     if ((crv = getenv("CLICOLOR"))) { // CLICOLOR is set
         if (!strcmp(crv,"1")) {
-            *f |= MASK_COLOR;
+            *o |= MASK_COLOR;
         } else {
-            *f &= ~MASK_COLOR;
+            *o &= ~MASK_COLOR;
         }
     } else { // CLICOLOR not defined, check TERM
         if ((crv = getenv("TERM"))) { // TERM is set
             if (!strcmp(crv,"xterm-256color")) {
-                *f |= MASK_COLOR;
+                *o |= MASK_COLOR;
             } else {
-                *f &= ~MASK_COLOR;
+                *o &= ~MASK_COLOR;
             }
         } else { // CLICOLOR and TERM not defined, give up
-            *f &= ~MASK_COLOR;
+            *o &= ~MASK_COLOR;
         }
     }
     /* Parse command line options with getopt */
@@ -547,9 +547,9 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
             /* Simulator options */
             case 'c': // --color
                 if (!strcmp(optarg,"disabled") || !strcmp(optarg,"d")) {
-                    *f &= ~MASK_COLOR;
+                    *o &= ~MASK_COLOR;
                 } else if (!strcmp(optarg,"force") || !strcmp(optarg,"f")) {
-                    *f |= MASK_COLOR;
+                    *o |= MASK_COLOR;
                 } else if (!strcmp(optarg,"auto") || !strcmp(optarg,"a")) {
                     // do nothing, already set above
                 } else {
@@ -557,7 +557,7 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                 }
                 break;
             case 'd': // --debug
-                *f |= MASK_DEBUG;
+                *o |= MASK_DEBUG;
                 break;
             case 'h': // --help
                 printf( "Usage: %s [option]... [file ...]\n"
@@ -588,14 +588,14 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
             case 'v': // --verbose
                 if (optarg != NULL) {
                     if (!strcmp(optarg,"v") || !strcmp(optarg,"2")) {
-                        *f |= (2<<SHIFT_VERBOSE);
+                        *o |= (2<<SHIFT_VERBOSE);
                     } else if (!strcmp(optarg,"vv") || !strcmp(optarg,"3")) {
-                        *f |= (3<<SHIFT_VERBOSE);
+                        *o |= (3<<SHIFT_VERBOSE);
                     } else {
                         eprintf("Invalid verbosity level: %s\n", optarg);
                     }
                 } else {
-                    *f |= (1<<SHIFT_VERBOSE);
+                    *o |= (1<<SHIFT_VERBOSE);
                 }
                 break;
             case '?': // error
@@ -606,7 +606,7 @@ int arguments(int argc, char **argv, flags_t *f, fp_list_t *fp_list) {
                 return RETURN_BAD_OPTS;
         }
     }
-    bprintf(2,"flags = 0x%08x\n", flags);
+    bprintf(2,"options = 0x%08x\n", options);
 
     /* Iterate through any remaining command line arguments (not options). */
     if (optind < argc) {

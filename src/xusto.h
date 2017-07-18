@@ -33,12 +33,12 @@ int execute(space_t *space, state_t state);
 /* Parse options and arguments
  * @argc: argc argument count from main()
  * @argv: argv argument vector from main()
- * @flags: flag pointer
+ * @options: option pointer
  * @fp_list: list of file pointers into which source files are placed
  * Returns -1 when the caller should return without errors,
  * returns >1 when the caller should return with errors,
  * returns 0 otherwise */
-int arguments(int argc, char **argv, flags_t *flags, fp_list_t *fp_list);
+int arguments(int argc, char **argv, options_t *options, fp_list_t *fp_list);
 
 /* Parse source file into a space
  * @fp: file pointer to an open source file

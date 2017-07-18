@@ -11,7 +11,7 @@ void cprintf(const char *color, const char *format, ...) {
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
     va_list args;
     va_start(args, format);
-    if (flags & MASK_COLOR) {
+    if (COLOR) {
         eprintf("%s", color);
         vfprintf(stderr, format, args);
         eprintf(ANSI_RESET);
