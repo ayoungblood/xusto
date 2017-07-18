@@ -9,14 +9,16 @@ extern flags_t flags;
 
 int main(int argc, char **argv) {
     int i;
+    // A program needs a space and a state to run
     space_t *space = NULL;
-    /* List of source files that will be set by the arguments wrapper */
+    state_t state;
+    // List of source files that will be set by the arguments() wrapper
     fp_list_t source_fp_list;
     source_fp_list.length = 0;
-    /* Parse arguments and options, initializing the file list */
+    // Parse arguments and options, initializing the file list and setting options
     int rv = arguments(argc, argv, &flags, &source_fp_list);
     if (rv != 0) return (rv == -1)?RETURN_OK:rv;
-    /* Loop through source file list and execute files */
+    // Loop through source file list and execute each file
     for (i = 0; i < source_fp_list.length; ++i) {
         // Create a space
         // @TODO space initialization values should probably be smarter
@@ -25,42 +27,39 @@ int main(int argc, char **argv) {
             eprintf("Failed to create program space for %s\n", source_fp_list.filepaths[i]);
             return RETURN_INIT_FAIL;
         }
+        // Initialize state
+        if ((state.stack = stack_create(1<<8)) == NULL) return RETURN_INIT_FAIL;
+        state.ip        = vector3(0,0,0);
+        state.iv        = vector3(1,0,0);
+        state.warp      = vector3(0,0,0);
+        state.portal    = vector3(0,0,0);
         // Parse the file
         bprintf(1,"Parsing %s\n", source_fp_list.filepaths[i]);
         rv = parse(source_fp_list.files[i], source_fp_list.filepaths[i], space);
         if (rv != 0) return rv;
         // Execute the file
-        rv = execute(space);
+        state.flags |= STATE_F_EXECUTE;
+        rv = execute(space, state);
         if (rv != 0) return rv;
         // Close the file
         bprintf(1,"Closing %s\n", source_fp_list.filepaths[i]);
         fclose(source_fp_list.files[i]);
         // Clean up
         space_destroy(space);
+        stack_destroy(state.stack);
     }
     fp_list_cleanup(&source_fp_list);
     return RETURN_OK;
 }
 
-int execute(space_t *space) {
+int execute(space_t *space, state_t state) {
     int rv;
-    state_t state;
     // Temporary vector
     vector3_t tempv;
     // Current instruction
     cell_t instr;
     // Temporary cells for stack operations
     cell_t a, b, c, x, y, z;
-
-    // Set up interpreter state
-    state.flags = STATE_F_EXECUTE;
-    state.warp = vector3(0,0,0);
-    state.portal = vector3(0,0,0);
-    // Initialize instruction vector and instruction pointer
-    state.ip = vector3(0,0,0);
-    state.iv = vector3(1,0,0);
-    // Create stack
-    if ((state.stack = stack_create(1<<8)) == NULL) return RETURN_INIT_FAIL;
 
     //space_print(space,vector3(0,0,0),vector3(15,7,0), 0);
     // Start executing

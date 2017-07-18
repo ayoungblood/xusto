@@ -5,20 +5,20 @@
 #include "xstack.h"
 
 /* Create and initialize a new stack */
-xstack_t *stack_create(size_t size) {
-    bprintf(2,"Creating stack of size %zu\n",size);
+xstack_t *stack_create(size_t max) {
     xstack_t *stack;
     if ((stack = (xstack_t*)malloc(sizeof(xstack_t))) == NULL) {
-        eprintf("Failed to create stack\n");
+        eprintf("Failed to create stack with max size %zu\n", max);
         return NULL;
     }
-    if ((stack->start = (cell_t*)malloc(size*sizeof(cell_t))) == NULL) {
-        eprintf("Failed to allocate memory for stack of size %zu\n", size);
+    if ((stack->start = (cell_t*)malloc(max*sizeof(cell_t))) == NULL) {
+        eprintf("Failed to allocate memory for stack with max size %zu\n", max);
         return NULL;
     }
     stack->top = stack->start;
-    stack->max = size;
+    stack->max = max;
     (*stack->top).i = 0; // an "empty" stack still has one element, set to zero
+    bprintf(2,"Created stack with max size %zu (%p)\n",max,(void*)stack);
     return stack;
 }
 /* Deallocate and destroy an existing stack */
@@ -27,7 +27,7 @@ void stack_destroy(xstack_t *stack) {
         eprintf("Cannot destroy what doesn't exist\n");
         return;
     }
-    bprintf(2,"Destroying stack of size %zu\n",stack_size(stack));
+    bprintf(2,"Destroying stack with max size %zu (%p)\n",stack->max,(void*)stack);
     free(stack->start);
     free(stack);
     stack = NULL;
@@ -37,12 +37,11 @@ void stack_push(xstack_t *stack, cell_t value) {
     // Check the size, expand if necessary
     if (stack_size(stack) > (stack->max >> 1) + (stack->max >> 2)) {
         if ((stack->start = (cell_t*)realloc(stack->start,stack->max<<1)) == NULL) {
-            eprintf("Failed to expand stack to size %zu, out of memory\n",stack->max<<1);
+            eprintf("Failed to expand stack to max size %zu, out of memory\n",stack->max<<1);
             return;
         }
     }
     *(++stack->top) = value;
-    //*stack->top = value;
 }
 /* Pop a value from the stack */
 cell_t stack_pop(xstack_t *stack) {

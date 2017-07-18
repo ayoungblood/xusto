@@ -11,13 +11,12 @@
 typedef struct xstack_t {
     cell_t *start;
     cell_t *top;
-    //uint64_t size;
     size_t max;
 } xstack_t;
 // xstack_t because stack_t conflicts with GNU stack
 
 /* Create and initialize a new stack */
-xstack_t *stack_create(size_t size);
+xstack_t *stack_create(size_t max);
 /* Deallocate and destroy an existing stack */
 void stack_destroy(xstack_t *stack);
 /* Push a value onto the stack */

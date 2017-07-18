@@ -24,10 +24,11 @@
 
 /* Execute from a space
  * @space: a space to execute
+ * @state: an interpreter start, initialized by caller
  * Returns -1 when the caller should return without errors,
  * returns >1 when the caller should return with errors,
  * returns 0 otherwise */
-int execute(space_t *space);
+int execute(space_t *space, state_t state);
 
 /* Parse options and arguments
  * @argc: argc argument count from main()
