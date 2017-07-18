@@ -92,7 +92,7 @@ $(TARGET): $(OBJECTS)
 all: $(TARGET)
 
 run: $(TARGET)
-		./$(TARGET) -vv sandbox/test-files/u.4
+		./$(TARGET) -vv test.xs3
 
 run-integration: $(TARGET)
 		./$(TARGET) integration-test/ip.xs3
