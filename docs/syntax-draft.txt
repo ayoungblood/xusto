@@ -93,38 +93,38 @@ Faraday constant (F)
 (see https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode)
 
 ## U+0000 - U+001F: Control codes (Parser instructions)
-U+0000 - NUL,   Does nothing
-U+0001 - SOH,   <reserved>
-U+0002 - STX,   <reserved>
-U+0003 - ETX,   (^C) @TODO Stop parsing and exit immediately
-U+0004 - EOT,   (^D) @TODO Stop parsing (EOF)
-U+0005 - ENQ,   <reserved>
-U+0006 - ACK,   <reserved>
-U+0007 - BEL,   Whack the parser, causing it to say "OUCH"
-U+0008 - BS,    Move write pointer one position leftwards (-x)
-U+0009 - HT,    Move write pointer four positions rightwards (+x)
-U+000A - LF,    Move write pointer one position downwards and reset left/right (+y, ±x)
-U+000B - VT,    Move write pointer one position downwards (+y)
-U+000C - FF,    Move write pointer one position into (+z)
-U+000D - CR,    Reset the write pointer left/right (±x)
-U+000E - SO,    <reserved>
-U+000F - SI,    <reserved>
-U+0010 - DLE,   <reserved>
-U+0011 - DC1,   <reserved> (XON)
-U+0012 - DC2,   <reserved>
-U+0013 - DC3,   <reserved> (XOFF)
-U+0014 - DC4,   <reserved>
-U+0015 - NAK,   <reserved>
-U+0016 - SYN,   <reserved>
-U+0017 - ETB,   <reserved>
-U+0018 - CAN,   @TODO Stop parsing and dump (do not execute)
-U+0019 - EM,    @TODO Stop parsing (EOF)
-U+001A - SUB,   <reserved>
-U+001B - ESC,   <reserved>
-U+001C - FS,    <reserved>
-U+001D - GS,    <reserved>
-U+001E - RS,    <reserved>
-U+001F - US,    <reserved>
+U+0000 - NUL    ^@ Null                 Parser no-op
+U+0001 - SOH    ^A Start of Heading     @TODO Reset the write pointer left/right and upwards (±x, -y)
+U+0002 - STX    ^B Start of Text        @TODO Set the initial instruction pointer from the write pointer
+U+0003 - ETX    ^C End of Text          @TODO Stop parsing and exit loudly
+U+0004 - EOT    ^D End of Transmission  @TODO Stop parsing and exit quietly
+U+0005 - ENQ    ^E Enquiry              <reserved>
+U+0006 - ACK    ^F Acknowledgement      <reserved>
+U+0007 - BEL    ^G Bell                 Whack the parser, causing it to say "OUCH"
+U+0008 - BS     ^H Backspace            Move write pointer one position leftwards (-x)
+U+0009 - HT     ^I Horizontal Tab       Move write pointer four positions rightwards (+x)
+U+000A - LF     ^J Line Feed            Move write pointer one position downwards and reset left/right (+y, ±x)
+U+000B - VT     ^K Vertical Tab         Move write pointer one position downwards (+y)
+U+000C - FF     ^L Form Feed            Move write pointer one position into (+z)
+U+000D - CR,    ^M Carriage Return      Reset the write pointer left/right (±x)
+U+000E - SO     ^N Shift Out            <reserved>
+U+000F - SI     ^O Shift In             <reserved>
+U+0010 - DLE    ^P Data Link Escape     <reserved>
+U+0011 - DC1    ^Q Device Control 1 (XON)       <reserved>
+U+0012 - DC2    ^R Device Control 2             <reserved>
+U+0013 - DC3    ^S Device Control 3 (XOFF)      <reserved>
+U+0014 - DC4    ^T Device Control 4             <reserved>
+U+0015 - NAK    ^U Negative Acknowledgement     <reserved>
+U+0016 - SYN    ^V Synchronous Idle             <reserved>
+U+0017 - ETB    ^W End of Transmission Block    <reserved>
+U+0018 - CAN    ^X Cancel               @TODO Stop parsing and dump (do not execute)
+U+0019 - EM     ^Y End of Medium        @TODO Stop parsing (EOF)
+U+001A - SUB    ^Z Substitute           <reserved>
+U+001B - ESC    ^[ Escape               <reserved>
+U+001C - FS     ^\ File Separator       <reserved>
+U+001D - GS     ^] Group Separator      <reserved>
+U+001E - RS     ^^ Record Separator     <reserved>
+U+001F - US     ^_ Unit Separator       <reserved>
 
 ## U+0020 - U+007E: Basic Latin (Core instructions)
 U+0020 - SPACE  no-op
@@ -325,6 +325,7 @@ U+00FE - þ,
 U+00FF - ÿ,
 
 ## U+0100 - U+017F: Latin Extended-A (Extended instructions)
+
 U+0174 - Ŵ, whack: Whacks the interpreter, causing it to say "Ouch!"
 U+0175 - ŵ, soft whack: Whacks the interpreter softly, causing it to say "ouch"
 
@@ -346,12 +347,12 @@ U+0175 - ŵ, soft whack: Whacks the interpreter softly, causing it to say "ouch"
 
 ## U+2000 - U+206F: General Punctuation (Extended instructions)
 
-U+2103 - ℃ degree Celsius:
-U+2107 - ℇ Euler-Mascheroni constant: push Euler's constant (~0.5772156649) to available precision
-U+2109 - ℉ degree Fahrenheit:
-U+210E - ℎ Planck constant: push Planck constant (~6.626070040E-34) to available precision
-U+210F - ℏ Planck constant over two Pi: push h-bar (~1.054571800E-34) to available precision
-U+2125 - ℥ ounce:
-U+2126 - Ω Ohm:
-U+212A - K Kelvin:
-U+212B - Å Angstrom:
+U+2103 - ℃, degree Celsius:
+U+2107 - ℇ, Euler-Mascheroni constant: push Euler's constant (~0.5772156649) to available precision
+U+2109 - ℉, degree Fahrenheit:
+U+210E - ℎ, Planck constant: push Planck constant (~6.626070040E-34) to available precision
+U+210F - ℏ, Planck constant over two Pi: push h-bar (~1.054571800E-34) to available precision
+U+2125 - ℥, ounce:
+U+2126 - Ω, Ohm:
+U+212A - K, Kelvin:
+U+212B - Å, Angstrom:

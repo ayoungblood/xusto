@@ -26,12 +26,14 @@ Because the instruction space is very large (UTF-8 encodes 1,112,064 valid code 
 
 In order to store a three-dimensional instruction space that may be very large in one or more dimensions without an extreme memory cost, we map a small space near the origin directly to a 3D array: accesses near the origin are very efficient. Accesses outside of this locality are instead directed to a hash table that can store cell values at a distance of up to the integer limit of the machine architecture. This all happens regardless of the current bounds of execution space, which may change at runtime (if the program decides to grow or shrink its hyperdonut). This prevents the interpreter from wasting a large quantity of memory allocating a larger and larger cube: the hash table can more easily handle the irregular access patterns that may arise.
 
-**Instruction wish list**
+**Instructions**
+
+Wish list/TODO:
 
 - Instructions for setting/getting flags
 - File I/O
 - stdin/stdout
-- Floating point support?
+- Floating point operations
 
 **Project wish list**
 
@@ -46,27 +48,14 @@ In order to store a three-dimensional instruction space that may be very large i
 `vector3_t`: a point or dimension in 3D space  
 `cell_t`: element of an execution space  
 `space_t`: represents an execution space  
-
-@TODO
-
-`stack_t`: stack type and wrappers for program execution
-`state_t`: program state type
-
-- state: stores the execution state
-    - instruction_pointer: current location in the program space
-        - `vector3_t`
-    - instruction_vector: direction of instruction pointer movement
-        - `vector3_t`
-    - stack: the stack on which the execution is happening on
-        - `stack_t`
-    - portal: stores the portal location
-        - `vector3_t`
-    - warp: stores the execution space warp coefficients
-        - `vector3_t`
-    - flags: boolean flag array
-        - `flags_t`
-
-- Parser: given a filename, returns a Cube
+`xstack_t`: stack type and stack operations
+`state_t`: interpreter execution state
+    - `vector3_t ip`: instruction pointer; the current location in the program space
+    - `vector3_t iv`: instruction vector; the current delta added to the instruction pointer to advance it
+    - `xstack stack`: the stack on which instructions operate
+    - `vector3_t warp`: stores the execution space warp coefficients
+    - `vector3_t portal`: stores the portal location
+    - `state_flags_t flags`: interpreter state flags
 
 - executor: given a execution space and a state, runs the execution loop
     - state
