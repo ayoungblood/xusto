@@ -62,7 +62,7 @@ RM = rm -f
 SRCS=src/xusto.c
 OBJS=$(subst .c,.o,$(SRCS))
 
-.PHONY: test clean run info
+.PHONY: test clean run info list
 
 # Get all the header files and object files
 HEADERS = $(wildcard src/*.h)
@@ -139,3 +139,7 @@ info:
 		@echo "STRFLAGS   = $(STRFLAGS)"
 		@echo "$(CC) --version: "
 		@$(CC) --version
+
+# Add a make target to list targets, see https://stackoverflow.com/a/26339924
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
