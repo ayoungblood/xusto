@@ -28,6 +28,11 @@
 #define RETURN_BAD_ARGS     0x01
 #define RETURN_BAD_OPTS     0x02
 #define RETURN_INIT_FAIL    0x03
+#define RETURN_HALTED       0x04
+#define RETURN_BAD_INST     0x05
+
+// Return codes (for subroutines)
+#define RETURN_OK_THRU      -0x01 // for exiting silently from a subroutine
 
 // ANSI escapes
 #define ANSI_C_BLACK        "\x1b[1;30m"

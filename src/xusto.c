@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     source_fp_list.length = 0;
     // Parse arguments and options, initializing the file list and setting options
     int rv = arguments(argc, argv, &options, &source_fp_list);
-    if (rv != 0) return (rv == -1)?RETURN_OK:rv;
+    if (rv != RETURN_OK) return (rv == RETURN_OK_THRU)?RETURN_OK:rv;
     // Loop through source file list and execute each file
     for (i = 0; i < source_fp_list.length; ++i) {
         // Create a space
@@ -36,11 +36,11 @@ int main(int argc, char **argv) {
         // Parse the file
         bprintf(1,"Parsing %s\n", source_fp_list.filepaths[i]);
         rv = parse(source_fp_list.files[i], source_fp_list.filepaths[i], space);
-        if (rv != 0) return rv;
+        if (rv != RETURN_OK) return (rv == RETURN_OK_THRU)?RETURN_OK:rv;
         // Execute the file
         state.flags |= STATE_F_EXECUTE;
         rv = execute(space, state);
-        if (rv != 0) return rv;
+        if (rv != RETURN_OK) return (rv == RETURN_OK_THRU)?RETURN_OK:rv;
         // Close the file
         bprintf(1,"Closing %s\n", source_fp_list.filepaths[i]);
         fclose(source_fp_list.files[i]);
@@ -369,7 +369,7 @@ int execute(space_t *space, state_t state) {
         }
         state.ip = vector3_addv(state.ip, state.iv);
 LOOP_END: // instructions may jump here to skip the usual instruction pointer advancement
-        if (INTERACTIVE) if ((rv = interactive()) != 0) return rv;
+        if (INTERACTIVE) if ((rv = interactive()) != RETURN_OK) return (rv == RETURN_OK_THRU)?RETURN_OK:rv;
     }
     // Flush stdout @TODO should we disable buffering on stdout instead?
     fflush(stdout);
@@ -445,12 +445,31 @@ int parse(FILE *fp, char *filepath, space_t *space) {
                 case 0x00: // NUL (^@) Null
                     // do absolutely nothing
                     break;
+                case 0x01: // SOH (^@) Start of Heading
+                    // Reset the write pointer left/right and upwards (±x, -y)
+                    wp.x = 0;
+                    wp.y = 0;
+                    break;
+                case 0x02: // STX (^B) Start of Text
+                    // @TODO Set the initial instruction pointer from the write pointer
+                    break;
                 case 0x03: // ETX (^C) End of Text
-                    // should probably do something with this
-                    break;
+                    // Stop parsing and exit loudly
+                    if (VERBOSITY) {
+                        cprintf(ANSI_C_RED, "Received ^D. Parsing halted (%s@b%zu)\n", filepath, bytes_read);
+                    } else {
+                        cprintf(ANSI_C_RED, "Received ^D. Parsing halted.\n");
+                    }
+                    return RETURN_HALTED;
+                    break; // never reached
                 case 0x04: // EOT (^D) End of Transmission
-                    // should probably do something with this
-                    break;
+                    // Stop parsing and exit quietly
+                    if (VERBOSITY) {
+                        cprintf(ANSI_C_GREEN, "Received ^D. Exiting parser.\n");
+                    }
+                    return RETURN_OK_THRU;
+                    break; // never reached
+
                 case 0x07: // BEL (^G) Bell
                     // Whack the parser, causing it to say "OUCH"
                     if (VERBOSITY) {
@@ -460,40 +479,45 @@ int parse(FILE *fp, char *filepath, space_t *space) {
                     }
                     break;
                 case 0x08: // BS (^H) Backspace
-                    // move left by 1
+                    // Move write pointer one position leftwards (-x)
                     wp.x -= 1;
                     break;
                 case 0x09: // HT (^I) Horizontal Tabulation
-                    // move right by 4
+                    // Move write pointer four positions rightwards (+x)
                     wp.x += 4;
                     break;
                 case 0x0a: // LF (^J) Line Feed
-                    // reset left/right and move down by 1 (*nix line endings)
+                    // Move write pointer one position downwards and reset left/right (+y, ±x) (*nix line endings)
                     wp.x = 0;
                     wp.y += 1;
                     break;
                 case 0x0b: // VT (^K) Vertical Tabulation
-                    // move down by 1
+                    // Move write pointer one position downwards (+y)
                     wp.y += 1;
                     break;
                 case 0x0c: // FF (^L) Form Feed
-                    // move into by 1
+                    // Move write pointer one position into (+z)
                     wp.z += 1;
                     break;
                 case 0x0d: // CR (^M) Carriage Return
-                    // reset left/right
+                    // Reset the write pointer left/right (±x)
                     wp.x = 0;
                     break;
+
                 case 0x18: // CAN (^X) Cancel
-                    // @TODO parser exit and dump
+                    // Stop parsing and dump (do not execute)
+                    // @TODO dump the space
+                    return RETURN_HALTED;
                     break;
                 case 0x19: // EM (^Y) End of medium
-                    // @TODO parser stop
+                    // Stop parsing and execute (EOF)
+                    return RETURN_OK;
                     break;
+
                 default: // Reserved/unimplemented/non-existent parser instruction
                     cprintf(ANSI_C_RED, "Reserved parser instruction in %s@b%zu: 0x%02x. Exiting.\n",
                         filepath, bytes_read, v);
-                    return 1; // @TODO FIXME
+                    return RETURN_BAD_INST;
             }
         } else { // character is a regular instruction, store it and advance the parser pointer
             cell.i = v;
@@ -501,7 +525,7 @@ int parse(FILE *fp, char *filepath, space_t *space) {
             ++wp.x;
         }
     }
-    return 0;
+    return RETURN_OK;
 }
 
 int arguments(int argc, char **argv, options_t *o, fp_list_t *fp_list) {
@@ -580,11 +604,11 @@ int arguments(int argc, char **argv, options_t *o, fp_list_t *fp_list) {
                         "\nFor options with string arguments, arguments may be shortened\n"
                         "as long as the arguments are not ambiguous.\n",
                         TARGET_STRING, TARGET_STRING);
-                return -1; // caller should exit without errors
+                return RETURN_OK_THRU; // caller should exit without errors
             case 'V': // --version
                 printf("%s - Interpreter for the Xusto language (v. %s)\n",
                     TARGET_STRING,VERSION_STRING);
-                return -1; // caller should exit without errors
+                return RETURN_OK_THRU; // caller should exit without errors
             case 'v': // --verbose
                 if (optarg != NULL) {
                     if (!strcmp(optarg,"v") || !strcmp(optarg,"2")) {
@@ -638,5 +662,5 @@ int arguments(int argc, char **argv, options_t *o, fp_list_t *fp_list) {
 }
 
 int interactive(void) {
-    return 0;
+    return RETURN_OK;
 }

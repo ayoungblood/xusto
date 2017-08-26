@@ -94,10 +94,10 @@ Faraday constant (F)
 
 ## U+0000 - U+001F: Control codes (Parser instructions)
 U+0000 - NUL    ^@ Null                 Parser no-op
-U+0001 - SOH    ^A Start of Heading     @TODO Reset the write pointer left/right and upwards (±x, -y)
+U+0001 - SOH    ^A Start of Heading     Reset the write pointer left/right and upwards (±x, -y)
 U+0002 - STX    ^B Start of Text        @TODO Set the initial instruction pointer from the write pointer
-U+0003 - ETX    ^C End of Text          @TODO Stop parsing and exit loudly
-U+0004 - EOT    ^D End of Transmission  @TODO Stop parsing and exit quietly
+U+0003 - ETX    ^C End of Text          Stop parsing and exit loudly
+U+0004 - EOT    ^D End of Transmission  Stop parsing and exit quietly
 U+0005 - ENQ    ^E Enquiry              <reserved>
 U+0006 - ACK    ^F Acknowledgement      <reserved>
 U+0007 - BEL    ^G Bell                 Whack the parser, causing it to say "OUCH"
@@ -106,7 +106,7 @@ U+0009 - HT     ^I Horizontal Tab       Move write pointer four positions rightw
 U+000A - LF     ^J Line Feed            Move write pointer one position downwards and reset left/right (+y, ±x)
 U+000B - VT     ^K Vertical Tab         Move write pointer one position downwards (+y)
 U+000C - FF     ^L Form Feed            Move write pointer one position into (+z)
-U+000D - CR,    ^M Carriage Return      Reset the write pointer left/right (±x)
+U+000D - CR     ^M Carriage Return      Reset the write pointer left/right (±x)
 U+000E - SO     ^N Shift Out            <reserved>
 U+000F - SI     ^O Shift In             <reserved>
 U+0010 - DLE    ^P Data Link Escape     <reserved>
@@ -117,8 +117,8 @@ U+0014 - DC4    ^T Device Control 4             <reserved>
 U+0015 - NAK    ^U Negative Acknowledgement     <reserved>
 U+0016 - SYN    ^V Synchronous Idle             <reserved>
 U+0017 - ETB    ^W End of Transmission Block    <reserved>
-U+0018 - CAN    ^X Cancel               @TODO Stop parsing and dump (do not execute)
-U+0019 - EM     ^Y End of Medium        @TODO Stop parsing (EOF)
+U+0018 - CAN    ^X Cancel               Stop parsing and dump (do not execute)
+U+0019 - EM     ^Y End of Medium        Stop parsing and execute (EOF)
 U+001A - SUB    ^Z Substitute           <reserved>
 U+001B - ESC    ^[ Escape               <reserved>
 U+001C - FS     ^\ File Separator       <reserved>
