@@ -3,7 +3,7 @@ Notes and Ideas
 
 **Preprocessor/Parser**
 
-The preprocessor/parser loads instructions from the source file into the execution space: the source files (regular text files encoded with the UTF-8) are one-dimensional byte streams, typically displayed as two-dimensional plaintext, but must be squished into a three-dimensional execution space. Care is taken to ensure that a typical text file will map intuitively into a 2D plane matching its appearance in a text editor, and additional characters may be used to place instructions at arbitrary locations in the 3D execution space.
+The preprocessor/parser loads instructions from the source file into the execution space: the source files (regular text files encoded with the UTF-8) are byte streams (which decode to one-dimensional character streams), typically displayed as two-dimensional plaintext, but must be squished into a three-dimensional execution space. Care is taken to ensure that a typical text file will map intuitively into a 2D plane matching its appearance in a text editor, and additional characters may be used to place instructions at arbitrary locations in the 3D execution space.
 
 This is done by reserving certain characters for parser instruction. The first 32 code points in UTF-8 (which are identical to the first 32 ASCII characters, and are non-printable) are reserved as parser instructions. The parser instruction mapping is designed to be as logical as possible, letting the control chars move a "virtual cursor" (a write pointer) through the execution space during parsing in a way that matches the behavior of a plaintext file.
 
@@ -23,6 +23,10 @@ The slightly annoying consequence is that programs with very complex parser inst
 Because the instruction space is very large (UTF-8 encodes 1,112,064 valid code points), and consequently only a small number of code points map to valid instructions, an array is not a satisfactory strategy for instruction decoding. Nor is a case statement (as was used by the original incarnation of Xusto). Additionally, as we eventually would like to support dynamic instruction remapping, we need to be able to dynamically assign instructions or macros of instructions to arbitrary code points. A hash table of "executable things" (a combination of function pointers for native instructions and microprograms for macros) seems to be a reasonable solution. The code point value indexes into the hash table, and the "executable thing" stored in the hash table, if it exists, is executed. The overhead should be minimal. Eventually, instructions that can reassign and populate the hash table with "executable things" should make the whole thing dynamic.
 
 **Space implementation**
+
+The instruction space is a three-dimensional "cuboid" of instructions. It can be thought of as either a cuboid/rectangular prism where the instruction pointer loops around in each dimension, or a "hyperdonut": when a plane is connected to itself along both edges, it forms a _2-torus_, also known as a conventional donut; a rectangular prism connected to itself along all faces forms a _3-torus_, which is hereafter referred to as a hyperdonut. The space is indexed with a 3-element vector, where {x,y,z} are >= {0,0,0} and < bounds. Accesses above or below the bounds of the space are wrapped around: if bounds = {4,4,2}, accessing {3,3,0} = {3,3,0}, {4,2,2} = {0,2,0}, {-1,5,-1} = {3,1,1}.
+
+The instruction space is bounded, but the bounds are dynamic and may change during runtime. When the instruction pointer travels past the current bounds of execution, the instruction pointer wraps around along the same dimension, manipulated by the current "warp": the warp factor distorts the hyperdonut. The limits of the instruction space (the maximum bounds) are determined by the available memory of the system and the integer width of the machine. Typically, during parsing, the bound of the instructions parsed into the instruction space determine the bounds of the space. However, the instruction space bounds may be changed dynamically during execution if different instruction space dimensions are desired. Note that shrinking the space and re-expanding it can cause instruction lossage as no attempt will be made to preserve instructions outside of the bounds.
 
 In order to store a three-dimensional instruction space that may be very large in one or more dimensions without an extreme memory cost, we map a small space near the origin directly to a 3D array: accesses near the origin are very efficient. Accesses outside of this locality are instead directed to a hash table that can store cell values at a distance of up to the integer limit of the machine architecture. This all happens regardless of the current bounds of execution space, which may change at runtime (if the program decides to grow or shrink its hyperdonut). This prevents the interpreter from wasting a large quantity of memory allocating a larger and larger cube: the hash table can more easily handle the irregular access patterns that may arise.
 
@@ -183,8 +187,6 @@ SHIFT-ALT:
 [MATL](https://github.com/lmendo/MATL)  
 [Bubblegum](https://esolangs.org/wiki/Bubblegum)  
 
-
-
 **Turing-Completeness**
 
 [Brainfuck](https://esolangs.org/wiki/Brainfuck) - Tape and 8 instructions  
@@ -199,11 +201,6 @@ SHIFT-ALT:
 [V: vim-based golfing language](https://github.com/DJMcMayhem/V)  
 
 ### Miscellany
-
-This applies to Xusto quite well:
-
-> #310194
-> <madk> The interpreter uses an unbounded tape size, but due to technical limitations will stop being unbounded if the tape size reaches 2^63 cells.
 
 A poem, regarding the pronunciation of certain characters:
 

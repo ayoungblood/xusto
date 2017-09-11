@@ -4,14 +4,13 @@
 
 #include "types.h"
 
-/* Clean up a list of file pointers */
-void fp_list_cleanup(fp_list_t *fp_list) {
-    if (fp_list->files) {
-        free(fp_list->files);
-    }
-    if (fp_list->filepaths) {
-        free(fp_list->filepaths);
-    }
+/* C doesn't have a modulo operator, add one for xint_t */
+xint_t xmod(xint_t a, xint_t b) {
+    if (b < 0) return xmod(a, -b);
+    if (b == 0) return 0;
+    xint_t rv = a % b;
+    if (rv < 0) rv += b;
+    return rv;
 }
 
 /* Syntactic sugar for creating a cell from an integer */
@@ -83,4 +82,46 @@ vector3_t vector3_dive(const vector3_t a, const vector3_t b) {
     rv.y = a.y / b.y;
     rv.z = a.z / b.z;
     return rv;
+}
+/* Rems a vector3 by a scalar (A % s) */
+vector3_t vector3_rems(const vector3_t a, const xint_t s) {
+    vector3_t rv;
+    rv.x = a.x % s;
+    rv.y = a.y % s;
+    rv.z = a.z % s;
+    return rv;
+}
+/* Element-wise vector3 remainder (A .% B) */
+vector3_t vector3_reme(const vector3_t a, const vector3_t b) {
+    vector3_t rv;
+    rv.x = a.x % b.x;
+    rv.y = a.y % b.y;
+    rv.z = a.z % b.z;
+    return rv;
+}
+/* Mods a vector3 by a scalar (A mod s) */
+vector3_t vector3_mods(const vector3_t a, const xint_t s) {
+    vector3_t rv;
+    rv.x = xmod(a.x,s);
+    rv.y = xmod(a.y,s);
+    rv.z = xmod(a.z,s);
+    return rv;
+}
+/* Element-wise vector3 modulo (A .mod B) */
+vector3_t vector3_mode(const vector3_t a, const vector3_t b) {
+    vector3_t rv;
+    rv.x = xmod(a.x,b.x);
+    rv.y = xmod(a.y,b.y);
+    rv.z = xmod(a.z,b.z);
+    return rv;
+}
+
+/* Clean up a list of file pointers */
+void fp_list_cleanup(fp_list_t *fp_list) {
+    if (fp_list->files) {
+        free(fp_list->files);
+    }
+    if (fp_list->filepaths) {
+        free(fp_list->filepaths);
+    }
 }

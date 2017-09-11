@@ -28,13 +28,13 @@ space_t *space_create(vector3_t block_size, size_t hash_size) {
         }
     }
     space->block_size = block_size;
-    // Default block offset to (0,0,0) for now
-    space->block_offset = vector3(0,0,0);
     // Allocate the space_hashtable
     if ((space->hash = space_hashtable_create(hash_size)) == NULL) {
         eprintf("Failed to create space_hashtable\n");
         return NULL;
     }
+    // No data, so no bounds
+    space->bounds = vector3(0,0,0);
     return space;
 }
 /* Deallocate and destroy an existing space */
@@ -51,32 +51,73 @@ void space_destroy(space_t *space) {
     free(space);
     space = NULL;
 }
-/* Set a cell in the space */
-void space_set(space_t *space, vector3_t index, cell_t val) {
-    if (index.x >= space->block_offset.x && index.x < space->block_size.x + space->block_offset.x &&
-        index.y >= space->block_offset.y && index.y < space->block_size.y + space->block_offset.y &&
-        index.z >= space->block_offset.z && index.z < space->block_size.z + space->block_offset.z) {
+
+/* Set a cell in the space and update the bounds to include the cell if necessary */
+void space_set_unbounded(space_t *space, vector3_t index, cell_t val) {
+    if (index.x < space->block_size.x &&
+        index.y < space->block_size.y &&
+        index.z < space->block_size.z) {
         // Index is inside block, access block directly
         space->block[index.z][index.y][index.x] = val;
     } else {
         // Index is outside block, set a value in the hashtable
         space_hashtable_set(space->hash, index, val);
     }
+    // Update bounds
+    if (index.x >= space->bounds.x) space->bounds.x = index.x + 1;
+    if (index.y >= space->bounds.y) space->bounds.y = index.y + 1;
+    if (index.z >= space->bounds.z) space->bounds.z = index.z + 1;
 }
-/* Get a cell in the space */
+/* Set a cell in the space, modded by bounds */
+void space_set(space_t *space, vector3_t index, cell_t val) {
+    vector3_t actual = vector3_mode(index, space->bounds);
+    if (actual.x < space->block_size.x &&
+        actual.y < space->block_size.y &&
+        actual.z < space->block_size.z) {
+        // Index is inside block, access block directly
+        space->block[actual.z][actual.y][actual.x] = val;
+    } else {
+        // Index is outside block, set a value in the hashtable
+        space_hashtable_set(space->hash, actual, val);
+    }
+    //printf("space_set: (%"XId",%"XId",%"XId") => (%"XId",%"XId",%"XId") = %"XIx"\n",
+    //    index.x,index.y,index.z,actual.x,actual.y,actual.z,val.i);
+}
+/* Get a cell in the space, modded by bounds */
 cell_t space_get(space_t *space, vector3_t index) {
     cell_t cell;
-    if (index.x >= space->block_offset.x && index.x < space->block_size.x + space->block_offset.x &&
-        index.y >= space->block_offset.y && index.y < space->block_size.y + space->block_offset.y &&
-        index.z >= space->block_offset.z && index.z < space->block_size.z + space->block_offset.z) {
+    vector3_t actual = vector3_mode(index, space->bounds);
+
+    if (actual.x < space->block_size.x &&
+        actual.y < space->block_size.y &&
+        actual.z < space->block_size.z) {
         // Index is inside block, access block directly
-        cell = space->block[index.z][index.y][index.x];
+        cell = space->block[actual.z][actual.y][actual.x];
     } else {
         // Index is outside block, get value from the hashtable
-        cell = space_hashtable_get(space->hash, index);
+        cell = space_hashtable_get(space->hash, actual);
     }
+    //printf("space_get: (%"XId",%"XId",%"XId") => (%"XId",%"XId",%"XId") = %"XIx"\n",
+    //    index.x,index.y,index.z,actual.x,actual.y,actual.z,cell.i);
     return cell;
 }
+
+/* Set the bounds */
+void space_bounds_set(space_t *space, vector3_t bounds) {
+    // Do nothing and fail silently if a bounds component is negative
+    if (bounds.x < 0 || bounds.y < 0 || bounds.z < 0) return;
+    space->bounds = bounds;
+}
+/* Get the bounds */
+vector3_t space_bounds_get(space_t *space) {
+    //printf("space_bounds_get: (%"XId",%"XId",%"XId")\n",space->bounds.x,space->bounds.y,space->bounds.z);
+    return space->bounds;
+}
+/* Transform an unbounded coordinate to a coordinate within the space */
+vector3_t space_bounds_transform(space_t *space, vector3_t index) {
+    return vector3_mode(index,space->bounds);
+}
+
 /* Print a section of the space (prints to stderr) */
 void space_print(space_t *space, vector3_t start, vector3_t end, int borders) {
     xint_t k, j, i;
@@ -99,5 +140,23 @@ void space_print(space_t *space, vector3_t start, vector3_t end, int borders) {
             }
             eprintf("\n");
         }
+    }
+}
+/* Dump the entire space to a file or stream */
+void space_dump(space_t *space, FILE *fp, char sep, int opt) {
+    xint_t k, j, i;
+    cell_t cell;
+    (void)opt;
+    for (k = 0; k < space->bounds.z; ++k) {
+        fprintf(fp,"(%"XIx":%"XIx",%"XIx":%"XIx",%"XIx"):\n",
+            0ULL,space->bounds.x-1,0ULL,space->bounds.y-1,k);
+        for (j = 0; j < space->bounds.y; ++j) {
+            for (i = 0; i < space->bounds.x; ++i) {
+                cell = space_get(space, vector3(i,j,k));
+                fprintf(fp,"%"XIx"%c", cell.i, sep);
+            }
+            fprintf(fp,"\n");
+        }
+        fprintf(fp,"\n");
     }
 }

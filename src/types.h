@@ -19,6 +19,10 @@ typedef int_fast64_t    xint_t;
 // General floating point type
 typedef double          xfloat_t;
 
+/* Integer operations */
+/* C doesn't have a modulo operator, add one for xint_t */
+xint_t xmod(xint_t a, xint_t b);
+
 /* Union type for a cell representing signed integer or float types */
 typedef union {
     xint_t i;
@@ -47,6 +51,14 @@ vector3_t vector3_divs(const vector3_t a, const xint_t s);
 vector3_t vector3_mule(const vector3_t a, const vector3_t b);
 /* Element-wise vector3 division (A ./ B) */
 vector3_t vector3_dive(const vector3_t a, const vector3_t b);
+/* Rems a vector3 by a scalar (A % s) */
+vector3_t vector3_rems(const vector3_t a, const xint_t s);
+/* Element-wise vector3 remainder (A .% B) */
+vector3_t vector3_reme(const vector3_t a, const vector3_t b);
+/* Mods a vector3 by a scalar (A % s) */
+vector3_t vector3_mods(const vector3_t a, const xint_t s);
+/* Element-wise vector3 modulo (A .% B) */
+vector3_t vector3_mode(const vector3_t a, const vector3_t b);
 
 // Options type (used as a bit vector), referred to as options to avoid confusion
 // with state flags type below

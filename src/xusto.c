@@ -367,7 +367,7 @@ int execute(space_t *space, state_t state) {
                 eprintf("Unimplemented instruction: %#"XIx"\n",instr.i);
             return 0;
         }
-        state.ip = vector3_addv(state.ip, state.iv);
+        state.ip = space_bounds_transform(space,vector3_addv(state.ip, state.iv));
 LOOP_END: // instructions may jump here to skip the usual instruction pointer advancement
         if (INTERACTIVE) if ((rv = interactive()) != RETURN_OK) return (rv == RETURN_OK_THRU)?RETURN_OK:rv;
     }
@@ -389,7 +389,7 @@ int parse(FILE *fp, char *filepath, space_t *space) {
     fseek(fp, 0, SEEK_END);
     file_length = (size_t)ftell(fp);
     rewind(fp);
-    bprintf(2,"%s is %zu bytes long\n", filepath, file_length);
+    bprintf(2,"Parsing %s, %zuB to be read\n", filepath, file_length);
     /* Iterate through the file, byte-by-byte */
     while (bytes_read < file_length) {
         // Check that we can actually read bytes, so if we are reading from
@@ -521,10 +521,13 @@ int parse(FILE *fp, char *filepath, space_t *space) {
             }
         } else { // character is a regular instruction, store it and advance the parser pointer
             cell.i = v;
-            space_set(space, wp, cell);
+            space_set_unbounded(space, wp, cell);
             ++wp.x;
         }
     }
+    vector3_t bounds = space_bounds_get(space);
+    bprintf(2, "Finished parsing %s, read %zuB, bounds = (%"XId",%"XId",%"XId")\n",
+        filepath, bytes_read, bounds.x, bounds.y, bounds.z);
     return RETURN_OK;
 }
 
