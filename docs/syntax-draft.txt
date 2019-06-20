@@ -182,7 +182,7 @@ U+0053 - S      set: pop x, y, z, a; set space(x,y,z) = a
 U+0054 - T,
 U+0055 - U,     unearth: copy n-th stack item to top
 U+0056 - V      set vector: pop x, y, z; set iv = (x,y,z)
-U+0057 - W      set warp: pop x, y, z; set warp = (x,y,z)
+U+0057 - W      set warp: pop a, b; warp[b] = a
 U+0058 - X,
 U+0059 - Y,
 U+005A - Z,
